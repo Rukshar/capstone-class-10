@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Voting for borrelsongs">
+    <title>Borrel AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <!--import font voor h1-->
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+
+</head>
+
+<body>
+<!-- Static navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <img class="navbar-brand" href="{{ url_for('main') }}" src="{{ url_for('static', filename='img/logo_white.png') }}">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01"
+            aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation" style="">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarColor01">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item{%- if request.path == url_for('main') %} active{% endif %}">
+                <a class="nav-link" href="{{ url_for('main') }}">Home</a>
+            </li>
+            <li class="nav-item{%- if request.path == url_for('vote') %} active{% endif %}">
+                <a class="nav-link" href="{{ url_for('vote') }}">Vote</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div id="particles-js">
+<div class="container">
+    <!-- particles.js container -->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/particles.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+
+
+    <div class="content">
+        <!-- flash messages -->
+        {% for error_message in get_flashed_messages(category_filter=["error"]) %}
+
+        <div class="alert alert-danger alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{ error_message }}
+        </div>
+
+        {% endfor %}
+
+        {% for success_message in get_flashed_messages(category_filter=["success"]) %}
+
+        <div class="alert alert-success alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{ success_message }}
+        </div>
+
+        {% endfor %}
+
+        {% for info_message in get_flashed_messages(category_filter=["info"]) %}
+
+        <div class="alert alert-info alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{ info_message }}
+        </div>
+
+        {% endfor %}
+
+        <!-- child template -->
+        {% block content %}
+        {% endblock %}
+
+    </div>
+    <div class="footer">
+        <hr>
+        <p>Xomnia - 2018</p>
+    </div>
+</div>
+</div>
+<!-- /.container -->
+
+<!--<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+
+</body>
+</html>

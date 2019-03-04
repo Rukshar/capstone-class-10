@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container">
+    <h1>Voting</h1>
+        {% for song in songs %}
+        <a href="{{ url_for('vote', song_id=song.Songs.id, round_id=song.SelectedSongs.round_id) }}" class="btn btn-primary btn-lg btn-block">{{song.Songs.artist}} - {{ song.Songs.title }}</a>
+        {% endfor %}
+</div>
+
+{% endblock %}
