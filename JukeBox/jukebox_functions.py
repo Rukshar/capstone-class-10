@@ -1,4 +1,5 @@
 # coding: utf-8
+import os
 import subprocess
 import random
 from datetime import datetime, timedelta
@@ -25,20 +26,21 @@ def count_votes(session):
 
     return winner
 
-def play_next_song(session_obj, scheduler):
+
+def play_next_song(session_obj, scheduler, music_folder):
     session = session_obj()
     song = count_votes(session)
     round_end = setup_new_round(session=session, song=song)
 
-    song_path = "../music/{}".format(song.filename)
+    song_path = os.path.join(music_folder, song.filename)
 
     run_date = round_end - timedelta(minutes=0, seconds=1)
     print('New song at', run_date)
-    scheduler.add_job(play_next_song, 'date', run_date=run_date, args=[session_obj, scheduler])
+    scheduler.add_job(play_next_song, 'date', run_date=run_date, args=[session_obj, scheduler, music_folder])
 
     print('Playing:', song.filename)
     # if on RasPi use 'vlc --one-instance --playlist-enqueue'
-    subprocess.call("vlc --one-instance --playlist-enqueue {}".format(song_path), shell=True)
+    subprocess.call("vlc --play-and-stop {}".format(song_path), shell=True)
 
     return None
 

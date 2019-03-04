@@ -27,7 +27,7 @@ first_round = datetime.now() + timedelta(minutes=0, seconds=1)
 scheduler = BlockingScheduler()
 
 # first songs starts after first round of voting (1 minute)
-scheduler.add_job(play_next_song, 'date', run_date=first_round, args=[Session, scheduler])
+scheduler.add_job(play_next_song, 'date', run_date=first_round, args=[Session, scheduler, music_folder])
 print('Starting Jukebox')
 scheduler.start()
 
