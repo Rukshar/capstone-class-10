@@ -4,6 +4,9 @@ from sqlalchemy import Column, String, Float, Integer, DateTime, ForeignKey
 Base = declarative_base()
 
 class Songs(Base):
+    """
+    Info on all possible songs
+    """
     __tablename__= 'songs'
 
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
@@ -23,6 +26,9 @@ class Songs(Base):
 
 
 class Round(Base):
+    """
+    Timestamp info and winner of all rounds
+    """
     __tablename__ = 'round'
 
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
@@ -35,20 +41,11 @@ class Round(Base):
         self.end_date = end_date
 
 
-class User(Base):
-    __tablename__ = 'user'
-
-    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
-    name = Column(String(100), nullable=False, unique=True)
-    email = Column(String(100), nullable=False, unique=True)
-    last_active = Column(DateTime, nullable=True)
-
-    def __init__(self, name, email):
-        self.name = name
-        self.email = email
-
 
 class IPAddress(Base):
+    """
+    List of all IP addresses that voted in current round
+    """
     __tablename__ = 'ipaddress'
 
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
@@ -61,6 +58,9 @@ class IPAddress(Base):
 
 
 class SelectedSongs(Base):
+    """
+    4 presented songs in every round
+    """
     __tablename__ = 'selectedsongs'
 
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
@@ -73,16 +73,19 @@ class SelectedSongs(Base):
 
 
 class Votes(Base):
+    """
+    Long format of all the votes on song in current round and past rounds
+    """
     __tablename__ = 'votes'
 
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     song_id = Column(Integer, ForeignKey('songs.id'), nullable=False)
     round_id = Column(Integer, ForeignKey('round.id'), nullable=False)
-    # user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
 
     def __init__(self, song_id, round_id):
         self.song_id = song_id
         self.round_id = round_id
-        # self.user_id = user_id
+
+
 
 

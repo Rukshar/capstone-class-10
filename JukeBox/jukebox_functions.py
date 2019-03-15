@@ -9,6 +9,11 @@ from db.objects import Songs, Votes, Round, SelectedSongs
 
 
 def count_votes(session):
+    """
+
+    :param session: db session object
+    :return: object, database row with info of most voted song
+    """
     now = datetime.now()
     vote_round = session.query(Round).filter(and_(Round.start_date <= now, Round.end_date >= now)).first()
 
@@ -28,6 +33,17 @@ def count_votes(session):
 
 
 def play_next_song(session_obj, scheduler, music_folder):
+    """
+    1. Call count votes
+    2. Setup New Round
+    3. Play next song
+
+    :param session_obj: db session object
+    :param scheduler: apschedular object
+    :param music_folder: path to music
+
+    :return: None
+    """
     session = session_obj()
     song = count_votes(session)
     round_end = setup_new_round(session=session, song=song)
@@ -40,12 +56,18 @@ def play_next_song(session_obj, scheduler, music_folder):
 
     print('Playing:', song.filename)
     # if on RasPi use 'vlc --one-instance --playlist-enqueue'
-    subprocess.call("vlc --play-and-stop {}".format(song_path), shell=True)
+    subprocess.call("afplay {}".format(song_path), shell=True)
 
     return None
 
 
 def setup_new_round(session, first_round=False, song=None):
+    """
+    :param session: db session object
+    :param first_round: Default: False. True if this is the first round to setup in jukebox session,
+    :param song: song object to determine new round end
+    :return:
+    """
     # Randomly provide selection of songs to choose from
     songs = session.query(Songs).all()
     selected_song_ids = random.sample(songs, 4)
