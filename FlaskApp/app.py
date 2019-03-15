@@ -17,6 +17,10 @@ def main():
 
 @app.route('/vote')
 def vote():
+    """
+    Registers votes and voters per round while checking if the specific user already voted in the current round
+    :return: url to new route in app depending on what the user did and in what voting round we are
+    """
     # Check whether a round is active, start one if not
     now = datetime.now()
     vote_round = db.session.query(Round).filter(and_(Round.start_date <= now, Round.end_date >= now)).first()
