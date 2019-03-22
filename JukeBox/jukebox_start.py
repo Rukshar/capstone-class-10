@@ -1,4 +1,7 @@
+import sys
+sys.path.append("../")
 import os
+
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -6,6 +9,7 @@ from db.objects import Base
 from db.populate import populate
 from JukeBox.jukebox_functions import setup_new_round, play_next_song
 from apscheduler.schedulers.background import BlockingScheduler
+
 
 music_folder = '../music/'
 db = '../db/dev.db'
@@ -33,7 +37,7 @@ def start_jukebox(music_folder=music_folder, db_path=db):
 
     round_end = setup_new_round(session, first_round=True)
     first_round = datetime.now() + timedelta(minutes=0, seconds=1)
-    scheduler = BlockingScheduler()
+    scheduler = BlockingScheduler(timezone="CET")
 
     # first songs starts after first round of voting (1 minute)
     scheduler.add_job(play_next_song, 'date', run_date=first_round, args=[Session, scheduler, music_folder])
