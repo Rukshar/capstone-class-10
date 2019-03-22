@@ -21,7 +21,8 @@ build/
 *.secrets
 vote_db
 
-music/
-songs/
+*.mp3
+*.m4a
+*.wav
 
 *.idea
