@@ -1,11 +1,49 @@
 # coding: utf-8
+import sys
+sys.path.append("../")
 import os
 import subprocess
 import random
+
 from datetime import datetime, timedelta
 from operator import itemgetter
-from sqlalchemy import and_, func
-from ..db.objects import Songs, Votes, Round, SelectedSongs
+from sqlalchemy import and_, func, create_engine
+from sqlalchemy.orm import sessionmaker
+from ..db.objects import Base, Songs, Votes, Round, SelectedSongs
+from ..db.populate import populate
+from apscheduler.schedulers.background import BlockingScheduler
+
+
+def start_jukebox(music_folder, db_path):
+    """
+    :param music_folder: string, path to music
+    :param db_path: string, path to store database
+    :return: None
+    """
+
+    db = 'sqlite:///{}'.format(db_path)
+
+    engine = create_engine(db, echo=False)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    # initiate database
+    if not os.path.isfile('../db/dev.db'):
+        print('No existing database found, starting new session')
+        Base.metadata.create_all(engine)
+
+    populate(session, music_folder)
+
+    round_end = setup_new_round(session, first_round=True)
+    first_round = datetime.now() + timedelta(minutes=0, seconds=1)
+    scheduler = BlockingScheduler(timezone="CET")
+
+    # first songs starts after first round of voting (1 minute)
+    scheduler.add_job(play_next_song, 'date', run_date=first_round, args=[Session, scheduler, music_folder])
+    print('Starting Jukebox')
+    scheduler.start()
+
+    return scheduler
 
 
 def count_votes(session):
