@@ -5,7 +5,7 @@ import random
 from datetime import datetime, timedelta
 from operator import itemgetter
 from sqlalchemy import and_, func
-from db.objects import Songs, Votes, Round, SelectedSongs
+from ..db.objects import Songs, Votes, Round, SelectedSongs
 
 
 def count_votes(session):
@@ -57,7 +57,7 @@ def play_next_song(session_obj, scheduler, music_folder):
     print('Playing:', song.filename)
     # if on RasPi use 'vlc --one-instance --playlist-enqueue'
     subprocess.call("afplay {}".format(song_path), shell=True)
-
+    # subprocess.call("vlc --one-instance --playlist-enqueue {}".format(song_path), shell=True)
     return None
 
 

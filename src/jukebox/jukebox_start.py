@@ -5,13 +5,13 @@ import os
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from db.objects import Base
-from db.populate import populate
-from JukeBox.jukebox_functions import setup_new_round, play_next_song
+from ..db.objects import Base
+from ..db.populate import populate
+from .jukebox_functions import setup_new_round, play_next_song
 from apscheduler.schedulers.background import BlockingScheduler
 
 
-music_folder = '../music/'
+music_folder = '../../music/'
 db = '../db/dev.db'
 
 

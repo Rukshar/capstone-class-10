@@ -3,6 +3,7 @@ from tinytag import TinyTag
 import os
 import re
 
+
 def populate(session, music_folder, accepted_file_extensions=['.mp3', '.m4a']):
     rename_songs(music_folder, accepted_file_extensions)
 
