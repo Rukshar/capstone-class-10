@@ -3,6 +3,7 @@ from sqlalchemy import Column, String, Float, Integer, DateTime, ForeignKey
 
 Base = declarative_base()
 
+
 class Songs(Base):
     """
     Info on all possible songs
@@ -39,7 +40,6 @@ class Round(Base):
     def __init__(self, start_date, end_date):
         self.start_date = start_date
         self.end_date = end_date
-
 
 
 class IPAddress(Base):

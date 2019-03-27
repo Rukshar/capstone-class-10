@@ -24,5 +24,6 @@ dependencies:
   - tzlocal=1.5.1
   - werkzeug=0.14.1
   - wheel=0.32.3
-  - tinytag
+  - pip:
+    - tinytag
 

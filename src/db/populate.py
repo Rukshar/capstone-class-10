@@ -1,7 +1,8 @@
-from db.objects import Base, Songs, Votes, Round, IPAddress
+from ..db.objects import Base, Songs, Votes, Round, IPAddress
 from tinytag import TinyTag
 import os
 import re
+
 
 def populate(session, music_folder, accepted_file_extensions=['.mp3', '.m4a']):
     rename_songs(music_folder, accepted_file_extensions)
@@ -25,7 +26,7 @@ def populate(session, music_folder, accepted_file_extensions=['.mp3', '.m4a']):
     return None
 
 
-def rename_songs(music_folder, accepted_file_extensions = ['.mp3', '.m4a']):
+def rename_songs(music_folder, accepted_file_extensions=['.mp3', '.m4a']):
     """
     Lower filenames and add underscores. Clean other special characters from filenames
     :param music_folder: path to music folder
