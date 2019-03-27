@@ -1,8 +1,11 @@
+import sys
+sys.path.append("../")
+
 from datetime import datetime
-from flask import Flask, request, render_template, flash, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
-from db.objects import Base, Songs, Votes, Round, User, SelectedSongs, IPAddress
+from db.objects import Songs, Votes, Round, SelectedSongs, IPAddress
 
 app = Flask(__name__)
 app.config.from_pyfile('.secrets')
