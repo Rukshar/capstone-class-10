@@ -39,7 +39,6 @@ class TestJukebox(unittest.TestCase):
 
     @patch('src.jukebox.jukebox_functions.datetime')
     def test_count_votes_current_round(self, MockDatetime):
-        MockDatetime = MockDatetime
         MockDatetime.now = Mock()
         MockDatetime.now.return_value = datetime.datetime(2019, 5, 1, 0, 0, 5)
 
@@ -51,7 +50,31 @@ class TestJukebox(unittest.TestCase):
         return self.assertEqual(truth, counted_votes)
 
 
-    def determine_winning_song_current_round(self):
+    def test_determine_winning_song_current_round(self):
+        now = datetime.datetime(2019, 5, 1, 0, 0, 5)
+        vote_round = self.session.query(Round).filter(and_(Round.start_date <= now, Round.end_date >= now)).first()
+
+        database_row_with_votes_per_song = self.session.query(func.count(Votes.song_id), Votes, Songs). \
+            filter_by(round_id=vote_round.id). \
+            join(Songs). \
+            group_by(Songs.id).all()
+
+        winner = self.jukebox.determine_winning_song_current_round(database_row_with_votes_per_song)
+        truth = 1
+
+        return self.assertEqual(truth, winner.id)
+
+    def test_select_random_song(self):
+        self.jukebox.vote_round = Mock()
+        self.jukebox.vote_round.id = 1
+        random_song = self.jukebox.select_random_song_from_database()
+
+        song_ids = []
+        for song_id in self.session.query(SelectedSongs.song_id):
+            song_ids.append(song_id)
+        song_ids_ = [song[0] for song in song_ids]
+
+        return self.assertIn(random_song.id, song_ids_)
 
 
 
