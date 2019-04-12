@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, String, Float, Integer, DateTime, ForeignKey
+from sqlalchemy import Column, String, Float, Integer, DateTime, ForeignKey, Sequence
 
 Base = declarative_base()
 
@@ -10,7 +10,7 @@ class Songs(Base):
     """
     __tablename__= 'songs'
 
-    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
+    id = Column(Integer, Sequence('song_id_seq'), primary_key=True)
     title = Column(String(100), nullable=False)
     artist = Column(String(100), nullable=False)
     filename = Column(String(100), nullable=False)
@@ -32,7 +32,7 @@ class Round(Base):
     """
     __tablename__ = 'round'
 
-    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
+    id = Column(Integer, Sequence('round_id_seq'), primary_key=True)
     start_date = Column(DateTime)
     end_date = Column(DateTime)
     round_winner = Column(Integer, ForeignKey('songs.id'))
@@ -48,7 +48,7 @@ class IPAddress(Base):
     """
     __tablename__ = 'ipaddress'
 
-    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
+    id = Column(Integer, Sequence('ip_id_seq'), primary_key=True)
     ip_address = Column(String(100), nullable=False, unique=False)
     round_id = Column(Integer, ForeignKey('round.id'), nullable=False)
 
@@ -63,7 +63,7 @@ class SelectedSongs(Base):
     """
     __tablename__ = 'selectedsongs'
 
-    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
+    id = Column(Integer, Sequence('sel_song_id_seq'), primary_key=True)
     song_id = Column(Integer, ForeignKey('songs.id'), nullable=False)
     round_id = Column(Integer, ForeignKey('round.id'), nullable=False)
 
@@ -78,7 +78,7 @@ class Votes(Base):
     """
     __tablename__ = 'votes'
 
-    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
+    id = Column(Integer, Sequence('vote_id_seq'), primary_key=True)
     song_id = Column(Integer, ForeignKey('songs.id'), nullable=False)
     round_id = Column(Integer, ForeignKey('round.id'), nullable=False)
 
