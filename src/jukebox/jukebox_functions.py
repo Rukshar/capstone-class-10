@@ -15,11 +15,9 @@ from apscheduler.schedulers.background import BlockingScheduler
 
 
 class JukeBox:
-    def __init__(self, music_folder, db_path):
+    def __init__(self, music_folder, db_uri):
         self.music_folder = music_folder
-        self.db_path = db_path
-        self.db = 'sqlite:///{}'.format(self.db_path)
-        self.engine = create_engine(self.db, echo=False)
+        self.engine = create_engine(db_uri, echo=False)
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
 
@@ -30,10 +28,9 @@ class JukeBox:
         :return: None
         """
 
-        # initiate database
-        if not os.path.isfile('../db/dev.db'):
-            print('No existing database found, starting new session')
-            Base.metadata.create_all(self.engine)
+        Base.metadata.drop_all(self.engine)
+        Base.metadata.create_all(self.engine)
+        self.session.commit()
 
         populate(self.session, self.music_folder)
 
@@ -58,7 +55,7 @@ class JukeBox:
         database_row_with_votes_per_song = self.session.query(func.count(Votes.song_id), Votes, Songs). \
             filter_by(round_id=self.vote_round.id). \
             join(Songs). \
-            group_by(Votes.song_id).all()
+            group_by(Votes.id, Songs.id).all()
 
         return database_row_with_votes_per_song
 
@@ -101,8 +98,8 @@ class JukeBox:
 
     def play_winning_song(self, winning_song, winning_song_path):
         #TODO: env for system (mac or windows)
-        subprocess.call("afplay {}".format(winning_song_path), shell=True)
-        # subprocess.call("vlc --one-instance --playlist-enqueue {}".format(song_path), shell=True)
+        # subprocess.call("afplay {}".format(winning_song_path), shell=True)
+        subprocess.call("vlc --one-instance --playlist-enqueue {}".format(winning_song_path), shell=True)
         print('Playing:', winning_song.filename)
 
     def setup_new_round(self, first_round=False, song=None):
