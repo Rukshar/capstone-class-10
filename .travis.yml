@@ -1,10 +1,12 @@
 language: python
+python: 
+  - "3.7.2"
 
 services: 
   - docker
 
 install:
-  - docker build -t capstone:latest
+  - docker build -t capstone:latest .
   - docker run -p 5000:5000 capstone:latest
 
 script: 
