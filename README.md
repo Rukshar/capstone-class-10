@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/Rukshar/capstone-class-10.svg?branch=master)](https://travis-ci.com/Rukshar/capstone-class-10)
+
 # Xomnia Capstone Project Class 10: Jukebox App
 Jukebox app to make the friday afterwork social drinks more fun by having a voting-based music system. Additionally 
 our capstone project which will conclude our traineeship. 
