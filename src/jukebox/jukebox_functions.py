@@ -9,134 +9,136 @@ from datetime import datetime, timedelta
 from operator import itemgetter
 from sqlalchemy import and_, func, create_engine
 from sqlalchemy.orm import sessionmaker
-from ..db.objects import Base, Songs, Votes, Round, SelectedSongs
-from ..db.populate import populate
+from src.db.objects import Base, Songs, Votes, Round, SelectedSongs
+from src.db.populate import populate
 from apscheduler.schedulers.background import BlockingScheduler
 
 
-def start_jukebox(music_folder, db_path):
-    """
-    :param music_folder: string, path to music
-    :param db_path: string, path to store database
-    :return: None
-    """
+class JukeBox:
+    def __init__(self, music_folder, db_path):
+        self.music_folder = music_folder
+        self.db_path = db_path
+        self.db = 'sqlite:///{}'.format(self.db_path)
+        self.engine = create_engine(self.db, echo=False)
+        self.Session = sessionmaker(bind=self.engine)
+        self.session = self.Session()
 
-    db = 'sqlite:///{}'.format(db_path)
+    def start_jukebox(self):
+        """
+        :param music_folder: string, path to music
+        :param db_path: string, path to store database
+        :return: None
+        """
 
-    engine = create_engine(db, echo=False)
-    Session = sessionmaker(bind=engine)
-    session = Session()
+        # initiate database
+        if not os.path.isfile('../db/dev.db'):
+            print('No existing database found, starting new session')
+            Base.metadata.create_all(self.engine)
 
-    # initiate database
-    if not os.path.isfile('../db/dev.db'):
-        print('No existing database found, starting new session')
-        Base.metadata.create_all(engine)
+        populate(self.session, self.music_folder)
 
-    populate(session, music_folder)
+        _ = self.setup_new_round(first_round=True)
 
-    round_end = setup_new_round(session, first_round=True)
-    first_round = datetime.now() + timedelta(minutes=0, seconds=1)
-    scheduler = BlockingScheduler(timezone="CET")
+        first_round = datetime.now() + timedelta(minutes=0, seconds=1)
+        self.scheduler = BlockingScheduler(timezone="CET")
 
-    # first songs starts after first round of voting (1 minute)
-    scheduler.add_job(play_next_song, 'date', run_date=first_round, args=[Session, scheduler, music_folder])
-    print('Starting Jukebox')
-    scheduler.start()
+        # first songs starts after first round of voting (1 minute)
+        self.scheduler.add_job(self.play_next_song, 'date', run_date=first_round)
+        print('Starting Jukebox')
+        self.scheduler.start()
 
-    return scheduler
-
-
-def count_votes(session):
-    """
-
-    :param session: db session object
-    :return: object, database row with info of most voted song
-    """
-    now = datetime.now()
-    vote_round = session.query(Round).filter(and_(Round.start_date <= now, Round.end_date >= now)).first()
-
-    counted_votes = session.query(func.count(Votes.song_id), Votes, Songs). \
-        filter_by(round_id=vote_round.id). \
-        join(Songs). \
-        group_by(Votes.song_id).all()
-
-    # handle rounds without votes
-    if len(counted_votes) > 0:
-        winner = max(counted_votes, key=itemgetter(0))[2]  # Remove returned votes object instead of indexing to 2?
-    else:
-        random_song_id = session.query(SelectedSongs).filter(SelectedSongs.round_id == vote_round.id).first().song_id
-        winner = session.query(Songs).filter(Songs.id == random_song_id).first()
-
-    return winner
-
-
-def play_next_song(session_obj, scheduler, music_folder):
-    """
-    1. Call count votes
-    2. Setup New Round
-    3. Play next song
-
-    :param session_obj: db session object
-    :param scheduler: apschedular object
-    :param music_folder: path to music
-
-    :return: None
-    """
-    session = session_obj()
-    song = count_votes(session)
-    round_end = setup_new_round(session=session, song=song)
-
-    song_path = os.path.join(music_folder, song.filename)
-
-    run_date = round_end - timedelta(minutes=0, seconds=1)
-    print('New song at', run_date)
-    scheduler.add_job(play_next_song, 'date', run_date=run_date, args=[session_obj, scheduler, music_folder])
-
-    print('Playing:', song.filename)
-    # if on RasPi use 'vlc --one-instance --playlist-enqueue'
-    subprocess.call("afplay {}".format(song_path), shell=True)
-    # subprocess.call("vlc --one-instance --playlist-enqueue {}".format(song_path), shell=True)
-    return None
-
-
-def setup_new_round(session, first_round=False, song=None):
-    """
-    :param session: db session object
-    :param first_round: Default: False. True if this is the first round to setup in jukebox session,
-    :param song: song object to determine new round end
-    :return:
-    """
-    # Randomly provide selection of songs to choose from
-    songs = session.query(Songs).all()
-    selected_song_ids = random.sample(songs, 4)
-
-    if first_round:
-        print('Setting up initial round')
+    def count_votes_current_round(self):
+        """
+        :param session: db session object
+        :return: object, database row with info of most voted song
+        """
         now = datetime.now()
-        round_end = now + timedelta(minutes=0, seconds=2)
-        vote_round = Round(now, round_end)
+        self.vote_round = self.session.query(Round).filter(and_(Round.start_date <= now, Round.end_date >= now)).first()
 
-    else:
-        previous_round = session.query(Round).order_by(Round.id.desc()).first()
-        round_end = previous_round.end_date + timedelta(minutes=0,
-                                                        seconds=song.duration)
-        vote_round = Round(previous_round.end_date, round_end)
+        database_row_with_votes_per_song = self.session.query(func.count(Votes.song_id), Votes, Songs). \
+            filter_by(round_id=self.vote_round.id). \
+            join(Songs). \
+            group_by(Votes.song_id).all()
 
-    session.add(vote_round)
+        return database_row_with_votes_per_song
 
-    # new query to gain current round id. Why?
-    # todo: check if this is best practice
-    current_round = session.query(Round).order_by(Round.id.desc()).first()
+    def determine_winning_song_current_round(self, database_row_with_votes_per_song):
+        if len(database_row_with_votes_per_song) > 0:
+            winner = max(database_row_with_votes_per_song, key=itemgetter(0))[2]
+            #TODO: Remove returned votes object instead of indexing to 2?
+        else:
+            winner = self.select_random_song_from_database()
+        return winner
 
-    for song in selected_song_ids:
-        selected_songs = SelectedSongs(song.id, current_round.id)
-        session.add(selected_songs)
+    def select_random_song_from_database(self):
+        random_song_id = self.session.query(SelectedSongs).filter(
+            SelectedSongs.round_id == self.vote_round.id).first().song_id
+        winner = self.session.query(Songs).filter(Songs.id == random_song_id).first()
+        return winner
 
-    session.flush()
-    session.commit()
+    def play_next_song(self):
+        """
+        1. Call count votes
+        2. Setup New Round
+        3. Play next song
 
-    return round_end
+        :param session_obj: db session object
+        :param scheduler: apschedular object
+        :param music_folder: path to music
 
+        :return: None
+        """
+        database_row_with_votes_per_song = self.count_votes_current_round()
+        winning_song = self.determine_winning_song_current_round(database_row_with_votes_per_song)
+        winning_song_path = os.path.join(self.music_folder, winning_song.filename)
 
+        #TODO: split function further
+        round_end = self.setup_new_round(song=winning_song, first_round=False)
+        run_date = round_end - timedelta(minutes=0, seconds=1)
+        print('New song at', run_date)
+        self.scheduler.add_job(self.play_next_song, 'date', run_date=run_date, args=[])
+        self.play_winning_song(winning_song, winning_song_path)
 
+    def play_winning_song(self, winning_song, winning_song_path):
+        #TODO: env for system (mac or windows)
+        subprocess.call("afplay {}".format(winning_song_path), shell=True)
+        # subprocess.call("vlc --one-instance --playlist-enqueue {}".format(song_path), shell=True)
+        print('Playing:', winning_song.filename)
 
+    def setup_new_round(self, first_round=False, song=None):
+        """
+        :param session: db session object
+        :param first_round: Default: False. True if this is the first round to setup in jukebox session,
+        :param song: song object to determine new round end
+        :return:
+        """
+        # Randomly provide selection of songs to choose from
+        songs = self.session.query(Songs).all()
+        selected_song_ids = random.sample(songs, 4)
+
+        if first_round:
+            print('Setting up initial round')
+            now = datetime.now()
+            round_end = now + timedelta(minutes=0, seconds=2)
+            vote_round = Round(now, round_end)
+
+        else:
+            previous_round = self.session.query(Round).order_by(Round.id.desc()).first()
+            round_end = previous_round.end_date + timedelta(minutes=0,
+                                                            seconds=song.duration)
+            vote_round = Round(previous_round.end_date, round_end)
+
+        self.session.add(vote_round)
+
+        # new query to gain current round id. Why?
+        # todo: check if this is best practice
+        current_round = self.session.query(Round).order_by(Round.id.desc()).first()
+
+        for song in selected_song_ids:
+            selected_songs = SelectedSongs(song.id, current_round.id)
+            self.session.add(selected_songs)
+
+        self.session.flush()
+        self.session.commit()
+
+        return round_end

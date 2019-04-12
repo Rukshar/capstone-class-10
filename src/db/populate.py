@@ -1,4 +1,4 @@
-from ..db.objects import Base, Songs, Votes, Round, IPAddress
+from src.db.objects import Base, Songs, Votes, Round, IPAddress
 from tinytag import TinyTag
 import os
 import re
