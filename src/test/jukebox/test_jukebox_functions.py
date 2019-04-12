@@ -6,7 +6,7 @@ from unittest.mock import patch, Mock
 
 import datetime
 from src.jukebox.jukebox_functions import JukeBox
-from db.objects import Base, Songs, Votes, Round, SelectedSongs
+from src.db.objects import Base, Songs, Votes, Round, SelectedSongs
 
 class TestJukebox(unittest.TestCase):
     @patch('src.jukebox.jukebox_functions.JukeBox.init_db')
