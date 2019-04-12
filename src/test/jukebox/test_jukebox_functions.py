@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from unittest.mock import patch, Mock
 
 import datetime
-from src.jukebox.jukebox_functions import count_votes
+from src.jukebox.jukebox_functions import JukeBox
 from db.objects import Base, Songs, Votes, Round, SelectedSongs
 
 class TestJukebox(unittest.TestCase):
