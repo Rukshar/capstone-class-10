@@ -1,14 +1,12 @@
 import unittest
-from unittest.mock import patch, Mock
 from sqlalchemy import and_, func, create_engine
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import sessionmaker
+from unittest.mock import patch, Mock
 
 import datetime
-from src.jukebox.jukebox_functions import JukeBox
-from src.db.objects import Base, Songs, Votes, Round, SelectedSongs
-
-
+from src.jukebox.jukebox_functions import count_votes
+from db.objects import Base, Songs, Votes, Round, SelectedSongs
 
 class TestJukebox(unittest.TestCase):
     @patch('src.jukebox.jukebox_functions.JukeBox.init_db')
@@ -80,4 +78,3 @@ class TestJukebox(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
