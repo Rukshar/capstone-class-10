@@ -13,14 +13,14 @@ class Songs(Base):
     id = Column(Integer, Sequence('song_id_seq'), primary_key=True)
     title = Column(String(100), nullable=False)
     artist = Column(String(100), nullable=False)
-    filename = Column(String(100), nullable=False)
+    uri = Column(String(100), nullable=False)
     duration = Column(Float(), nullable=False)
     year = Column(Integer, nullable=True)
 
-    def __init__(self, title, artist, filename, duration, year=None):
+    def __init__(self, title, artist, uri, duration, year=None):
         self.title = title
         self.artist = artist
-        self.filename = filename
+        self.uri = uri
         self.duration = duration
         if year:
             self.year = year

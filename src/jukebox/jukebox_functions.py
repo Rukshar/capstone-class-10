@@ -4,6 +4,8 @@ sys.path.append("../")
 import os
 import subprocess
 import random
+import spotipy
+import spotipy.util as util
 
 from datetime import datetime, timedelta
 from operator import itemgetter
@@ -13,19 +15,35 @@ from src.db.objects import Base, Songs, Votes, Round, SelectedSongs
 from src.db.populate import populate
 from apscheduler.schedulers.background import BlockingScheduler
 
+from src.jukebox.secrets import username, client_id, client_secret
 
 class JukeBox:
-    def __init__(self, music_folder, db_uri):
-        self.music_folder = music_folder
+    def __init__(self, user_playlist_uri, source_playlist_uri, db_uri):
+        self.user_playlist_uri = user_playlist_uri
+        self.source_playlist_uri = source_playlist_uri
         self.session = self.init_db(db_uri)
 
 
-    def init_db(self, dbc_uri):
+    def init_db(self, db_uri):
         self.engine = create_engine(db_uri, echo=False)
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
 
         return self.session
+
+    def spotify_login(self, username=username, client_id=client_id, client_secret=client_secret):
+        self.username = username
+        scope = 'playlist-modify-public'
+
+        token = util.prompt_for_user_token(self.username,
+                                           scope,
+                                           client_id=client_id,
+                                           client_secret=client_secret,
+                                           redirect_uri='http://localhost/')
+
+        self.spotify = spotipy.Spotify(auth=token)
+
+        return None
 
     def start_jukebox(self):
         """
@@ -33,13 +51,24 @@ class JukeBox:
         :param db_path: string, path to store database
         :return: None
         """
-
+        # empty db and start new schema
         Base.metadata.drop_all(self.engine)
         Base.metadata.create_all(self.engine)
         self.session.commit()
 
-        populate(self.session, self.music_folder)
+        # login to spotify
+        self.spotify_login()
 
+        # get source playlist_content and populate database
+        playlist = self.spotify.user_playlist(self.username,
+                                              self.source_playlist_uri,
+                                              fields=['tracks'])
+
+        playlist = playlist['tracks']['items']
+
+        populate(self.session, playlist)
+
+        # start playing music
         _ = self.setup_new_round(first_round=True)
 
         first_round = datetime.now() + timedelta(minutes=0, seconds=1)
@@ -61,7 +90,7 @@ class JukeBox:
         database_row_with_votes_per_song = self.session.query(func.count(Votes.song_id), Votes, Songs). \
             filter_by(round_id=self.vote_round.id). \
             join(Songs). \
-            group_by(Songs.id).all()
+            group_by(Votes.id, Songs.id).all()
 
         return database_row_with_votes_per_song
 
@@ -93,20 +122,18 @@ class JukeBox:
         """
         database_row_with_votes_per_song = self.count_votes_current_round()
         winning_song = self.determine_winning_song_current_round(database_row_with_votes_per_song)
-        winning_song_path = os.path.join(self.music_folder, winning_song.filename)
+        track_uri = [winning_song.uri]
+
 
         #TODO: split function further
         round_end = self.setup_new_round(song=winning_song, first_round=False)
         run_date = round_end - timedelta(minutes=0, seconds=1)
         print('New song at', run_date)
         self.scheduler.add_job(self.play_next_song, 'date', run_date=run_date, args=[])
-        self.play_winning_song(winning_song, winning_song_path)
+        self.play_winning_song(track_uri)
 
-    def play_winning_song(self, winning_song, winning_song_path):
-        #TODO: env for system (mac or windows)
-        subprocess.call("afplay {}".format(winning_song_path), shell=True)
-        # subprocess.call("vlc --one-instance --playlist-enqueue {}".format(winning_song_path), shell=True)
-        print('Playing:', winning_song.filename)
+    def play_winning_song(self, track_uri):
+        self.spotify.user_playlist_add_tracks(self.username, self.user_playlist_uri, track_uri)
 
     def setup_new_round(self, first_round=False, song=None):
         """

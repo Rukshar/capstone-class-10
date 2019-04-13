@@ -19,6 +19,8 @@ build/
 
 *.db
 *.secrets
+*secrets
+*.cache
 vote_db
 
 *.mp3
