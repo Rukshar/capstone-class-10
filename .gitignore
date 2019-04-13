@@ -19,7 +19,7 @@ build/
 
 *.db
 *.secrets
-*secrets
+*spotipy
 *.cache
 vote_db
 

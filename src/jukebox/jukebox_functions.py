@@ -15,11 +15,12 @@ from src.db.objects import Base, Songs, Votes, Round, SelectedSongs
 from src.db.populate import populate
 from apscheduler.schedulers.background import BlockingScheduler
 
-from src.jukebox.secrets import username, client_id, client_secret
+from src.jukebox.spotipy_config import CLIENT_ID, CLIENT_SECRET
 
 class JukeBox:
-    def __init__(self, user_playlist_uri, source_playlist_uri, db_uri):
-        self.user_playlist_uri = user_playlist_uri
+    def __init__(self, username, target_playlist_uri, source_playlist_uri, db_uri):
+        self.username = username
+        self.target_playlist_uri = target_playlist_uri
         self.source_playlist_uri = source_playlist_uri
         self.session = self.init_db(db_uri)
 
@@ -31,14 +32,13 @@ class JukeBox:
 
         return self.session
 
-    def spotify_login(self, username=username, client_id=client_id, client_secret=client_secret):
-        self.username = username
+    def spotify_login(self, client_id=CLIENT_ID, client_secret=CLIENT_SECRET):
         scope = 'playlist-modify-public'
 
         token = util.prompt_for_user_token(self.username,
                                            scope,
-                                           client_id=client_id,
-                                           client_secret=client_secret,
+                                           client_id=CLIENT_ID,
+                                           client_secret=CLIENT_SECRET,
                                            redirect_uri='http://localhost/')
 
         self.spotify = spotipy.Spotify(auth=token)
@@ -124,8 +124,6 @@ class JukeBox:
         winning_song = self.determine_winning_song_current_round(database_row_with_votes_per_song)
         track_uri = [winning_song.uri]
 
-
-        #TODO: split function further
         round_end = self.setup_new_round(song=winning_song, first_round=False)
         run_date = round_end - timedelta(minutes=0, seconds=1)
         print('New song at', run_date)
@@ -133,7 +131,7 @@ class JukeBox:
         self.play_winning_song(track_uri)
 
     def play_winning_song(self, track_uri):
-        self.spotify.user_playlist_add_tracks(self.username, self.user_playlist_uri, track_uri)
+        self.spotify.user_playlist_add_tracks(self.username, self.target_playlist_uri, track_uri)
 
     def setup_new_round(self, first_round=False, song=None):
         """
