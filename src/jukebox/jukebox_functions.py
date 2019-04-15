@@ -20,7 +20,7 @@ class JukeBox:
         self.session = self.init_db(db_uri)
 
 
-    def init_db(self, dbc_uri):
+    def init_db(self, db_uri):
         self.engine = create_engine(db_uri, echo=False)
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
@@ -61,7 +61,7 @@ class JukeBox:
         database_row_with_votes_per_song = self.session.query(func.count(Votes.song_id), Votes, Songs). \
             filter_by(round_id=self.vote_round.id). \
             join(Songs). \
-            group_by(Songs.id).all()
+            group_by(Votes.id, Songs.id).all()
 
         return database_row_with_votes_per_song
 

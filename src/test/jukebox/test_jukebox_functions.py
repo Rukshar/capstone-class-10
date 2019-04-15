@@ -43,10 +43,9 @@ class TestJukebox(unittest.TestCase):
         counted_votes = self.jukebox.count_votes_current_round()
         counted_votes = [(v[2].id, v[0]) for v in counted_votes]
 
-        truth = [(1,2), (2,1)]
+        truth = [(1,1), (2,1), (1,1)]
 
         return self.assertEqual(truth, counted_votes)
-
 
     def test_determine_winning_song_current_round(self):
         now = datetime.datetime(2019, 5, 1, 0, 0, 5)
@@ -55,7 +54,7 @@ class TestJukebox(unittest.TestCase):
         database_row_with_votes_per_song = self.session.query(func.count(Votes.song_id), Votes, Songs). \
             filter_by(round_id=vote_round.id). \
             join(Songs). \
-            group_by(Songs.id).all()
+            group_by(Votes.id, Songs.id).all()
 
         winner = self.jukebox.determine_winning_song_current_round(database_row_with_votes_per_song)
         truth = 1
