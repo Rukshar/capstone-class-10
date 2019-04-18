@@ -13,19 +13,16 @@ def index():
     Registers votes and voters per round while checking if the specific user already voted in the current round
     :return: url to new route in app depending on what the user did and in what voting round we are
     """
-    # Check whether a round is active, start one if not
-    if db:
-        now = datetime.now()
-        vote_round = db.session.query(Round).filter(and_(Round.start_date <= now, Round.end_date >= now)).first()
+    now = datetime.now()
+    vote_round = db.session.query(Round).filter(and_(Round.start_date <= now, Round.end_date >= now)).first()
 
-        if not vote_round:
-            return render_template('error/not_active.html')
-        else:
-            selected_songs = db.session.query(SelectedSongs, Songs).filter_by(round_id=vote_round.id).join(Songs).all()
-
-            return render_template('vote/vote.html', songs=selected_songs)
+    print('hello')
+    if not vote_round:
+        return render_template('error/not_active.html')
     else:
-        return redirect(url_for('vote.index'))
+        selected_songs = db.session.query(SelectedSongs, Songs).filter_by(round_id=vote_round.id).join(Songs).all()
+
+        return render_template('vote/vote.html', songs=selected_songs)
 
 
 @vote.route('/vote_song')
@@ -52,6 +49,10 @@ def vote_song():
             return redirect(url_for('vote.vote_redirect'))
     else:
         return redirect(url_for('vote.expired'))
+
+@vote.route('/test')
+def vote_test():
+    return render_template('vote/voted.html')
 
 
 @vote.route('/vote_redirect')
