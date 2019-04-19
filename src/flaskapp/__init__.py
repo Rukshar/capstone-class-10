@@ -38,10 +38,10 @@ def create_app(ConfigObject=DevelopmentConfig):
 
     db.init_app(app)
 
-    register_blueprints(app)
-
     with app.app_context():
         db.Model.metadata.reflect(db.engine)
+
+    register_blueprints(app)
 
     return app
 
