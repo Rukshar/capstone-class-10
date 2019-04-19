@@ -26,7 +26,7 @@ def vote():
     """
     # Check whether a round is active, start one if not
     now = datetime.now()
-    vote_round = db.session.query(Round).filter(and_(Round.start_date <= now, Round.end_date >= now)).first()
+    vote_round = db.session.query(Round).order_by(Round.id.desc()).first()
 
     if not vote_round:
         return redirect(url_for('main'))

@@ -40,7 +40,9 @@ class JukeBox:
 
         populate(self.session, self.music_folder)
 
-        _ = self.setup_new_round(first_round=True)
+        _ = self.setup_initial_round()
+
+        self.add_song_options()
 
         first_round = datetime.now() + timedelta(minutes=0, seconds=1)
         self.scheduler = BlockingScheduler(timezone="CET")
@@ -83,7 +85,8 @@ class JukeBox:
         """
         1. Call count votes
         2. Setup New Round
-        3. Play next song
+        3. Add song options
+        4. Play next song
 
         :param session_obj: db session object
         :param scheduler: apschedular object
@@ -91,14 +94,15 @@ class JukeBox:
 
         :return: None
         """
+
         database_row_with_votes_per_song = self.count_votes_current_round()
         winning_song = self.determine_winning_song_current_round(database_row_with_votes_per_song)
         winning_song_path = os.path.join(self.music_folder, winning_song.filename)
 
         #TODO: split function further
-        round_end = self.setup_new_round(song=winning_song, first_round=False)
+        round_end = self.setup_new_round(song=winning_song)
+        self.add_song_options()
         run_date = round_end - timedelta(minutes=0, seconds=1)
-        print('New song at', run_date)
         self.scheduler.add_job(self.play_next_song, 'date', run_date=run_date, args=[])
         self.play_winning_song(winning_song, winning_song_path)
 
@@ -108,7 +112,19 @@ class JukeBox:
         # subprocess.call("vlc --one-instance --playlist-enqueue {}".format(winning_song_path), shell=True)
         print('Playing:', winning_song.filename)
 
-    def setup_new_round(self, first_round=False, song=None):
+    
+    def setup_initial_round(self):
+        # Setup the first round
+
+        print('Setting up initial round')
+        now = datetime.now()
+        round_end = now + timedelta(minutes=0, seconds=2)
+        vote_round = Round(now, round_end)
+
+        self.session.add(vote_round)
+        
+    
+    def setup_new_round(self, song=None):
         """
         :param session: db session object
         :param first_round: Default: False. True if this is the first round to setup in jukebox session,
@@ -116,26 +132,26 @@ class JukeBox:
         :return:
         """
         # Randomly provide selection of songs to choose from
-        songs = self.session.query(Songs).all()
-        selected_song_ids = random.sample(songs, 4)
-
-        if first_round:
-            print('Setting up initial round')
-            now = datetime.now()
-            round_end = now + timedelta(minutes=0, seconds=2)
-            vote_round = Round(now, round_end)
-
-        else:
-            previous_round = self.session.query(Round).order_by(Round.id.desc()).first()
-            round_end = previous_round.end_date + timedelta(minutes=0,
+        
+        previous_round = self.session.query(Round).order_by(Round.id.desc()).first()
+        print('previous round', previous_round.end_date)
+        round_end = previous_round.end_date + timedelta(minutes=0,
                                                             seconds=song.duration)
-            vote_round = Round(previous_round.end_date, round_end)
+        print('round end in setup_new_round', round_end)
+        vote_round = Round(previous_round.end_date, round_end)
 
         self.session.add(vote_round)
 
-        # new query to gain current round id. Why?
-        # todo: check if this is best practice
+        return round_end
+
+    
+    def add_song_options(self):
+        # Provide songs that people can vote on
+
         current_round = self.session.query(Round).order_by(Round.id.desc()).first()
+
+        songs = self.session.query(Songs).all()
+        selected_song_ids = random.sample(songs, 4)
 
         for song in selected_song_ids:
             selected_songs = SelectedSongs(song.id, current_round.id)
@@ -144,4 +160,5 @@ class JukeBox:
         self.session.flush()
         self.session.commit()
 
-        return round_end
+
+
