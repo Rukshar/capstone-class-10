@@ -16,11 +16,7 @@ mock_import = Mock()
 
 
 def import_mock(name, *args, **kwargs):
-    if name.find('spotipy') > -1:
-        print(name)
-
     if name == 'src.jukebox.spotipy_config':
-        print(name, 'Mocked!')
         return mock_import
     return orig_import(name, *args, **kwargs)
 
