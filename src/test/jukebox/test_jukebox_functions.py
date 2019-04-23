@@ -24,8 +24,6 @@ def import_mock(name, *args, **kwargs):
 with patch('builtins.__import__', side_effect=import_mock):
     from src.jukebox.jukebox_functions import JukeBox
 
-test = sys.modules
-
 
 class TestJukebox(unittest.TestCase):
     @patch('src.jukebox.jukebox_functions.JukeBox.init_db')
