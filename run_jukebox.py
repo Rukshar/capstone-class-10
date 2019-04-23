@@ -4,7 +4,6 @@ from src.jukebox.spotipy_config import USERNAME, TARGET_PLAYLIST_URI, SOURCE_PLA
 db_uri = 'postgresql://postgres:docker@localhost:5432/postgres'
 
 jukebox = JukeBox(username=USERNAME,
-                  target_playlist_uri=TARGET_PLAYLIST_URI,
                   source_playlist_uri=SOURCE_PLAYLIST_URI,
                   db_uri=db_uri)
 

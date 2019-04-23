@@ -18,9 +18,9 @@ from apscheduler.schedulers.background import BlockingScheduler
 from src.jukebox.spotipy_config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI
 
 class JukeBox:
-    def __init__(self, username, target_playlist_uri, source_playlist_uri, db_uri):
+    def __init__(self, username, source_playlist_uri, db_uri):
         self.username = username
-        self.target_playlist_uri = target_playlist_uri
+        # self.target_playlist_uri = target_playlist_uri
         self.source_playlist_uri = source_playlist_uri
         self.session = self.init_db(db_uri)
 
@@ -32,7 +32,7 @@ class JukeBox:
 
         return self.session
 
-    def spotify_login(self, client_id=CLIENT_ID, client_secret=CLIENT_SECRET, redirect_uri=REDIRECT_URI):
+    def _spotify_login(self, client_id=CLIENT_ID, client_secret=CLIENT_SECRET, redirect_uri=REDIRECT_URI):
         scope = 'playlist-modify-public'
 
         token = util.prompt_for_user_token(self.username,
@@ -44,6 +44,35 @@ class JukeBox:
         self.spotify = spotipy.Spotify(auth=token)
 
         return None
+
+    def _create_spotify_target_playlist(self):
+        today = datetime.today()
+        target_playlist_title = '{}{}{}-XomniaBorrel'.format(today.year,
+                                                             today.month,
+                                                             today.day)
+
+        # check if playlist exists
+        playlists = self.spotify.user_playlists(self.username)
+        for p in playlists['items']:
+            if p['name'] == target_playlist_title:
+                self.target_playlist_uri = p['id']
+
+                return None
+
+            # otherwise create playlist and retrieve the id
+            else:
+                self.spotify.user_playlist_create(self.username, target_playlist_title)
+
+                #retreive playlist uri of the new playlist for playback
+                playlists = self.spotify.user_playlists(self.username)
+                print(playlists['items'][0]['name'])
+
+                target_playlist = [p for p in playlists['items'] if p['name'] == target_playlist_title]
+
+                self.target_playlist_uri = target_playlist[0]['id']
+
+                return None
+
 
     def start_jukebox(self):
         """
@@ -57,7 +86,8 @@ class JukeBox:
         self.session.commit()
 
         # login to spotify
-        self.spotify_login()
+        self._spotify_login()
+        self._create_spotify_target_playlist()
 
         # get source playlist_content and populate database
         playlist = self.spotify.user_playlist(self.username,
