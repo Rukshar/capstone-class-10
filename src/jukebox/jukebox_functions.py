@@ -37,9 +37,9 @@ class JukeBox:
 
         token = util.prompt_for_user_token(self.username,
                                            scope,
-                                           client_id=CLIENT_ID,
-                                           client_secret=CLIENT_SECRET,
-                                           redirect_uri=REDIRECT_URI)
+                                           client_id=client_id,
+                                           client_secret=client_secret,
+                                           redirect_uri=redirect_uri)
 
         self.spotify = spotipy.Spotify(auth=token)
 
