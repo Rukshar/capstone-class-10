@@ -15,7 +15,7 @@ from src.db.objects import Base, Songs, Votes, Round, SelectedSongs
 from src.db.populate import populate
 from apscheduler.schedulers.background import BlockingScheduler
 
-from src.jukebox.test_config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI
+from src.jukebox.spotipy_config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI
 
 class JukeBox:
     def __init__(self, username, target_playlist_uri, source_playlist_uri, db_uri):

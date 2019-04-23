@@ -1,5 +1,5 @@
 from src.jukebox.jukebox_functions import JukeBox
-from src.jukebox.test_config import USERNAME, TARGET_PLAYLIST_URI, SOURCE_PLAYLIST_URI
+from src.jukebox.spotipy_config import USERNAME, TARGET_PLAYLIST_URI, SOURCE_PLAYLIST_URI
 
 db_uri = 'postgresql://postgres:docker@localhost:5432/postgres'
 
