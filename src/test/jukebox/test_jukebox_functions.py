@@ -15,10 +15,10 @@ orig_import = __import__
 mock_import = Mock()
 
 
-def import_mock(name, *args):
+def import_mock(name, *args, **kwargs):
     if name == 'spotipy_config':
         return mock_import
-    return orig_import(name, *args)
+    return orig_import(name, *args, **kwargs)
 
 
 with patch('builtins.__import__', side_effect=import_mock):
