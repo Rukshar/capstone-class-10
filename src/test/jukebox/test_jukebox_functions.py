@@ -1,12 +1,29 @@
 import unittest
+import sys
 from sqlalchemy import and_, func, create_engine
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import sessionmaker
 from unittest.mock import patch, Mock
+import builtins
 
 import datetime
-from src.jukebox.jukebox_functions import JukeBox
 from src.db.objects import Base, Songs, Votes, Round, SelectedSongs
+
+# fix for TravisCI missing spotipy config file
+# Store original __import__ and the mock import
+orig_import = __import__
+mock_import = Mock()
+
+
+def import_mock(name, *args):
+    if name == 'spotipy_config':
+        return mock_import
+    return orig_import(name, *args)
+
+
+with patch('builtins.__import__', side_effect=import_mock):
+    from src.jukebox.jukebox_functions import JukeBox
+
 
 class TestJukebox(unittest.TestCase):
     @patch('src.jukebox.jukebox_functions.JukeBox.init_db')

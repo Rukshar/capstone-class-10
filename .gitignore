@@ -1,12 +1,11 @@
 venv/
 
 *.iws
+*.pyc
+*.idea
 workspace.xml
 tasks.xml
-
-*.pyc
 __pycache__/
-
 instance/
 
 .pytest_cache/
@@ -19,12 +18,10 @@ build/
 
 *.db
 *.secrets
-*spotipy
 *.cache
 vote_db
+spotipy_config.py
 
 *.mp3
 *.m4a
 *.wav
-
-*.idea
