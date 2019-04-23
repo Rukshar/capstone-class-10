@@ -32,7 +32,7 @@ class JukeBox:
 
         return self.session
 
-    def spotify_login(self, client_id=CLIENT_ID, client_secret=CLIENT_SECRET):
+    def spotify_login(self, client_id=CLIENT_ID, client_secret=CLIENT_SECRET, redirect_uri=REDIRECT_URI):
         scope = 'playlist-modify-public'
 
         token = util.prompt_for_user_token(self.username,
