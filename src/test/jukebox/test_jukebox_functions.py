@@ -16,13 +16,19 @@ mock_import = Mock()
 
 
 def import_mock(name, *args, **kwargs):
-    if name == 'spotipy_config':
+    if name.find('spotipy') > -1:
+        print(name)
+
+    if name == 'src.jukebox.spotipy_config':
+        print(name, 'Mocked!')
         return mock_import
     return orig_import(name, *args, **kwargs)
 
 
 with patch('builtins.__import__', side_effect=import_mock):
     from src.jukebox.jukebox_functions import JukeBox
+
+test = sys.modules
 
 
 class TestJukebox(unittest.TestCase):
