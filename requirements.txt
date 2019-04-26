@@ -19,4 +19,5 @@ wheel==0.32.3
 tinytag
 psycopg2-binary
 spotipy==2.4.4
-
+gevent
+gunicorn
