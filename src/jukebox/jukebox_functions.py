@@ -4,6 +4,8 @@ sys.path.append("../")
 import os
 import subprocess
 import random
+import spotipy
+import spotipy.util as util
 
 from datetime import datetime, timedelta
 from operator import itemgetter
@@ -13,10 +15,13 @@ from src.db.objects import Base, Songs, Votes, Round, SelectedSongs
 from src.db.populate import populate
 from apscheduler.schedulers.background import BlockingScheduler
 
+from src.jukebox.spotipy_config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI
 
 class JukeBox:
-    def __init__(self, music_folder, db_uri):
-        self.music_folder = music_folder
+    def __init__(self, username, source_playlist_uri, db_uri):
+        self.username = username
+        self.target_playlist_uri = None
+        self.source_playlist_uri = source_playlist_uri
         self.session = self.init_db(db_uri)
 
 
@@ -27,19 +32,76 @@ class JukeBox:
 
         return self.session
 
+    def _spotify_login(self, client_id=CLIENT_ID, client_secret=CLIENT_SECRET, redirect_uri=REDIRECT_URI):
+        scope = 'playlist-modify-public playlist-modify-private'
+
+        token = util.prompt_for_user_token(self.username,
+                                           scope,
+                                           client_id=client_id,
+                                           client_secret=client_secret,
+                                           redirect_uri=redirect_uri)
+
+        self.spotify = spotipy.Spotify(auth=token)
+        print("Spotify login succeeded.")
+        return None
+
+    def _create_spotify_target_playlist(self):
+        today = datetime.today()
+        target_playlist_title = '{}{}{}-XomniaBorrel'.format(today.year,
+                                                             today.month,
+                                                             today.day)
+        print("Finding target playlist...")
+        # check if playlist exists
+        playlists = self.spotify.user_playlists(self.username)
+        if not playlists['items']:
+            return self.make_new_playlist(target_playlist_title)
+        else:
+            for p in playlists['items']:
+                if p['name'] == target_playlist_title:
+                    self.target_playlist_uri = p['id']
+                    return None
+                # otherwise create playlist and retrieve the id
+                else:
+                    return self.make_new_playlist(target_playlist_title)
+
+    def make_new_playlist(self, playlist_title):
+        print("Making new playlist...")
+        self.spotify.user_playlist_create(self.username, playlist_title)
+
+        # retreive playlist uri of the new playlist for playback
+        playlists = self.spotify.user_playlists(self.username)
+        print("Made playlist {}".format(playlists['items'][0]['name']))
+
+        target_playlist = [p for p in playlists['items'] if p['name'] == playlist_title]
+        self.target_playlist_uri = target_playlist[0]['id']
+        return None
+
+
     def start_jukebox(self):
         """
         :param music_folder: string, path to music
         :param db_path: string, path to store database
         :return: None
         """
-
+        # empty db and start new schema
         Base.metadata.drop_all(self.engine)
         Base.metadata.create_all(self.engine)
         self.session.commit()
 
-        populate(self.session, self.music_folder)
+        # login to spotify
+        self._spotify_login()
+        self._create_spotify_target_playlist()
 
+        # get source playlist_content and populate database
+        playlist = self.spotify.user_playlist(self.username,
+                                              self.source_playlist_uri,
+                                              fields=['tracks'])
+
+        playlist = playlist['tracks']['items']
+
+        populate(self.session, playlist)
+
+        # start playing music
         _ = self.setup_new_round(first_round=True)
 
         first_round = datetime.now() + timedelta(minutes=0, seconds=1)
@@ -93,20 +155,16 @@ class JukeBox:
         """
         database_row_with_votes_per_song = self.count_votes_current_round()
         winning_song = self.determine_winning_song_current_round(database_row_with_votes_per_song)
-        winning_song_path = os.path.join(self.music_folder, winning_song.filename)
+        track_uri = [winning_song.uri]
 
-        #TODO: split function further
         round_end = self.setup_new_round(song=winning_song, first_round=False)
         run_date = round_end - timedelta(minutes=0, seconds=1)
         print('New song at', run_date)
         self.scheduler.add_job(self.play_next_song, 'date', run_date=run_date, args=[])
-        self.play_winning_song(winning_song, winning_song_path)
+        self.play_winning_song(track_uri)
 
-    def play_winning_song(self, winning_song, winning_song_path):
-        #TODO: env for system (mac or windows)
-        subprocess.call("afplay {}".format(winning_song_path), shell=True)
-        # subprocess.call("vlc --one-instance --playlist-enqueue {}".format(winning_song_path), shell=True)
-        print('Playing:', winning_song.filename)
+    def play_winning_song(self, track_uri):
+        self.spotify.user_playlist_add_tracks(self.username, self.target_playlist_uri, track_uri)
 
     def setup_new_round(self, first_round=False, song=None):
         """
