@@ -50,7 +50,7 @@ class TestJukebox(unittest.TestCase):
 
 
         MockInitDb.return_value = self.session
-        self.jukebox = JukeBox('empty_music', 'empty_db', 'empty', 'empty')
+        self.jukebox = JukeBox('empty_music', 'empty_db', 'empty')
 
     @patch('src.jukebox.jukebox_functions.datetime')
     def test_count_votes_current_round(self, MockDatetime):
