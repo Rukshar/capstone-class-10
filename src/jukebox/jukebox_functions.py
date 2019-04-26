@@ -20,7 +20,7 @@ from src.jukebox.spotipy_config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI
 class JukeBox:
     def __init__(self, username, source_playlist_uri, db_uri):
         self.username = username
-        # self.target_playlist_uri = target_playlist_uri
+        self.target_playlist_uri = None
         self.source_playlist_uri = source_playlist_uri
         self.session = self.init_db(db_uri)
 
@@ -33,7 +33,7 @@ class JukeBox:
         return self.session
 
     def _spotify_login(self, client_id=CLIENT_ID, client_secret=CLIENT_SECRET, redirect_uri=REDIRECT_URI):
-        scope = 'playlist-modify-public'
+        scope = 'playlist-modify-public playlist-modify-private'
 
         token = util.prompt_for_user_token(self.username,
                                            scope,
@@ -42,7 +42,7 @@ class JukeBox:
                                            redirect_uri=redirect_uri)
 
         self.spotify = spotipy.Spotify(auth=token)
-
+        print("Spotify login succeeded.")
         return None
 
     def _create_spotify_target_playlist(self):
@@ -50,28 +50,31 @@ class JukeBox:
         target_playlist_title = '{}{}{}-XomniaBorrel'.format(today.year,
                                                              today.month,
                                                              today.day)
-
+        print("Finding target playlist...")
         # check if playlist exists
         playlists = self.spotify.user_playlists(self.username)
-        for p in playlists['items']:
-            if p['name'] == target_playlist_title:
-                self.target_playlist_uri = p['id']
+        if not playlists['items']:
+            return self.make_new_playlist(target_playlist_title)
+        else:
+            for p in playlists['items']:
+                if p['name'] == target_playlist_title:
+                    self.target_playlist_uri = p['id']
+                    return None
+                # otherwise create playlist and retrieve the id
+                else:
+                    return self.make_new_playlist(target_playlist_title)
 
-                return None
+    def make_new_playlist(self, playlist_title):
+        print("Making new playlist...")
+        self.spotify.user_playlist_create(self.username, playlist_title)
 
-            # otherwise create playlist and retrieve the id
-            else:
-                self.spotify.user_playlist_create(self.username, target_playlist_title)
+        # retreive playlist uri of the new playlist for playback
+        playlists = self.spotify.user_playlists(self.username)
+        print("Made playlist {}".format(playlists['items'][0]['name']))
 
-                #retreive playlist uri of the new playlist for playback
-                playlists = self.spotify.user_playlists(self.username)
-                print(playlists['items'][0]['name'])
-
-                target_playlist = [p for p in playlists['items'] if p['name'] == target_playlist_title]
-
-                self.target_playlist_uri = target_playlist[0]['id']
-
-                return None
+        target_playlist = [p for p in playlists['items'] if p['name'] == playlist_title]
+        self.target_playlist_uri = target_playlist[0]['id']
+        return None
 
 
     def start_jukebox(self):
