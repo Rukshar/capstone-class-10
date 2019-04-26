@@ -58,7 +58,7 @@ and add it to the config as `SOURCE_PLAYLIST_URI`.
 
 Then, create an empty playlist, get the URI and add it as `TARGET_PLAYLIST_URI` to the config. 
 
-Optionally, you  can also set them as environment variables like so:
+__Optionally, you  can also set them as environment variables like so:__
 
 ```
 export SPOTIPY_CLIENT_ID='your-spotify-client-id'
