@@ -13,8 +13,8 @@ ADD ./ ${APP_DIR}/
 # install requirements
 RUN pip install -r requirements.txt
 
-# expose port 5000
-EXPOSE 5000
+# expose port 5432
+EXPOSE 5432
 
 # Run the application when the container launches
-CMD ["python", "run.py"]
+CMD ["python", "run_jukebox.py"]
