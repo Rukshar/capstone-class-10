@@ -34,15 +34,13 @@ class JukeBox:
     def _spotify_login(self, client_id=CLIENT_ID, client_secret=CLIENT_SECRET, redirect_uri=REDIRECT_URI):
         scope = 'playlist-modify-public playlist-modify-private'
 
-        # token = util.prompt_for_user_token(self.username,
-        #                                    scope,
-        #                                    client_id=client_id,
-        #                                    client_secret=client_secret,
-        #                                    redirect_uri=redirect_uri)
+        token = util.prompt_for_user_token(self.username,
+                                           scope,
+                                           client_id=client_id,
+                                           client_secret=client_secret,
+                                           redirect_uri=redirect_uri)
 
-        token = json.load(open(".cache-{}".format(USERNAME)))
-
-        self.spotify = spotipy.Spotify(auth=token['access_token'])
+        self.spotify = spotipy.Spotify(auth=token)
         print("Spotify login succeeded.")
         return None
 
