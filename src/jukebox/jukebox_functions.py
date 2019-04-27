@@ -1,8 +1,7 @@
 # coding: utf-8
 import sys
 sys.path.append("../")
-import os
-import subprocess
+import json
 import random
 import spotipy
 import spotipy.util as util
@@ -15,7 +14,7 @@ from src.db.objects import Base, Songs, Votes, Round, SelectedSongs
 from src.db.populate import populate
 from apscheduler.schedulers.background import BlockingScheduler
 
-from src.jukebox.spotipy_config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI
+from src.jukebox.spotipy_config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, USERNAME
 
 class JukeBox:
     def __init__(self, username, source_playlist_uri, db_uri):
@@ -35,13 +34,15 @@ class JukeBox:
     def _spotify_login(self, client_id=CLIENT_ID, client_secret=CLIENT_SECRET, redirect_uri=REDIRECT_URI):
         scope = 'playlist-modify-public playlist-modify-private'
 
-        token = util.prompt_for_user_token(self.username,
-                                           scope,
-                                           client_id=client_id,
-                                           client_secret=client_secret,
-                                           redirect_uri=redirect_uri)
+        # token = util.prompt_for_user_token(self.username,
+        #                                    scope,
+        #                                    client_id=client_id,
+        #                                    client_secret=client_secret,
+        #                                    redirect_uri=redirect_uri)
 
-        self.spotify = spotipy.Spotify(auth=token)
+        token = json.load(open(".cache-{}".format(USERNAME)))
+
+        self.spotify = spotipy.Spotify(auth=token['access_token'])
         print("Spotify login succeeded.")
         return None
 

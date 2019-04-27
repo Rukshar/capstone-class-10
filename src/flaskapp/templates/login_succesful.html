@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container">
+    <h1>You are logged in to Spotify. You will be redirected to the admin page.</h1>
+
+    <script>
+    setTimeout(function(){
+        window.location.href = '/admin';
+    }, 3000);
+    </script>
+</div>
+
+{% endblock %}
