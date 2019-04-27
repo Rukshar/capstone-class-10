@@ -124,11 +124,10 @@ def login_succesful():
 @app.route('/start_jukebox')
 def start_jukebox():
     if os.path.isfile(cache_path):
-        # client = docker.from_env()
-        # client.containers.run("jukebox:latest", detach=True)
+        client = docker.from_env()
+        client.containers.run("jukebox:latest", detach=True)
 
-        import subprocess
-        subprocess.call(['python', 'run_jukebox.py'], shell=True)
+        # todo: docker will not start from start jukebox button.
 
         return render_template('jukebox_started')
 
