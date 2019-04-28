@@ -27,4 +27,4 @@ dependencies:
   - pip:
     - tinytag
     - spotipy
-
+    - flask_basicauth

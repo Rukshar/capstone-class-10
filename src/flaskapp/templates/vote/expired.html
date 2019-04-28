@@ -2,7 +2,13 @@
 {% block content %}
 
 <div class="container">
-    <h1>Voting round expired! Try again.</h1>
+    <h1>Voting round expired! Redirecting to the new votes.</h1>
+
+        <script>
+    setTimeout(function(){
+        window.location.href = '/vote';
+    }, 2000);
+    </script>
 </div>
 
 {% endblock %}

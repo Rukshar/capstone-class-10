@@ -16,7 +16,6 @@ def index():
     now = datetime.now()
     vote_round = db.session.query(Round).filter(and_(Round.start_date <= now, Round.end_date >= now)).first()
 
-    print(vote_round)
     if vote_round is None:
         return render_template('error/not_active.html')
 

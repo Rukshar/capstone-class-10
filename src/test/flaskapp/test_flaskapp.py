@@ -1,5 +1,4 @@
 import unittest
-import os
 import datetime
 
 from sqlalchemy.engine import create_engine
@@ -7,11 +6,25 @@ from sqlalchemy.orm import sessionmaker
 
 from src.db.objects import Base, Songs, Votes, Round, SelectedSongs
 from src.flaskapp import create_app
-from flask import request
 
 from src.flaskapp.config import TestingConfig
 
 from unittest.mock import patch, Mock
+
+
+orig_import = __import__
+mock_import = Mock()
+
+
+def import_mock(name, *args, **kwargs):
+    if name == 'src.jukebox.spotipy_config':
+        return mock_import
+    return orig_import(name, *args, **kwargs)
+
+
+with patch('builtins.__import__', side_effect=import_mock):
+    from src.flaskapp.views.admin.admin import admin
+
 
 class TestFlaskapp(unittest.TestCase):
 
