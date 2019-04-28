@@ -15,4 +15,3 @@ if __name__ == '__main__':
 
     jukebox_thread.start()
     flaskapp_thread.start()
-
