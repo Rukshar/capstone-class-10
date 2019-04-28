@@ -3,12 +3,12 @@ body {
 }
 
 h1 {
-    color: #ffffff;
+    color: #223284;
     font-family: 'Raleway', sans-serif;
 }
 
 .error {
-  color: red;
+  color: blue;
   font-size: .8em;
 }
 
@@ -16,16 +16,41 @@ h1 {
   padding-top: 60px;
 }
 
-.bg-primary{
-    background-color: #1DB954 !important;
+.bg-primary {
+    background-color: #223284 !important;
     border: 0px;
 }
 
+button:focus { outline: none; }
+
 .btn-primary {
-    color: #223284 !important;
-    background-color: #ffffff !important;
-    border-color: #6384d0#6 !important;
+    color: #fffff !important;
+    border-color: #6384d0 !important;
+    background: #2e51a1 !important
 }
+
+.btn-primary:hover {
+    color: #fffff !important;
+    border-color: #6384d0 !important;
+    background: #2e51a1 !important
+}
+
+.btn-primary:active {
+    color: #fffff !important;
+    border-color: #6384d0 !important;
+    background: #6384d0 !important
+    outline:none; !important
+    box-shadow:none; !important
+}
+
+.btn-primary:focus {
+    color: #fffff !important;
+    border-color: #6384d0 !important;
+    background: #6384d0 !important
+    outline:none; !important
+    box-shadow:none; !important
+}
+
 .view-logo img {
      max-width: 100%;
      height: auto;
@@ -43,7 +68,7 @@ hr {
     display: block;
     height: 1px;
     border: 0;
-    border-top: 1px solid #1DB954;
+    border-top: 1px solid #6384d0;
     margin: 1em 0;
     padding: 0;
 }
@@ -62,15 +87,4 @@ hr {
     left:0;
     width:100%;
     height:100%;
-}
-Sour
-
-/* ---- particles.js container ---- */
-
-#particles-js {
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: 50% 50%;
-  background-repeat: no-repeat;
 }
