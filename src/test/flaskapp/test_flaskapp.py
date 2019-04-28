@@ -23,7 +23,7 @@ def import_mock(name, *args, **kwargs):
 
 
 with patch('builtins.__import__', side_effect=import_mock):
-    from src.jukebox.spotipy_config import CLIENT_ID, CLIENT_SECRET, USERNAME, REDIRECT_URI
+    from src.flaskapp.views.admin.admin import admin
 
 
 class TestFlaskapp(unittest.TestCase):
