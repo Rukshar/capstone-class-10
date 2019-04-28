@@ -9,7 +9,7 @@ from src.flaskapp.extensions import db
 from src.flaskapp.config import *
 
 
-def create_app(ConfigObject=DevelopmentConfig):
+def create_app(ConfigObject=ProdConfig):
 
     env = os.environ.get('ENV')
     if ConfigObject:
@@ -19,7 +19,7 @@ def create_app(ConfigObject=DevelopmentConfig):
             config = ProdConfig
         elif env == 'testing':
             config = TestingConfig
-        else:
+        elif env == 'development':
             config = DevelopmentConfig
 
     app = Flask(__name__)
