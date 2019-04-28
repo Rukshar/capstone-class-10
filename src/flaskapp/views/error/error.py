@@ -19,6 +19,6 @@ def internal_server_error(e):
     return render_template('error/500.html'), 500
 
 
-@error.app_errorhandler(Exception)
-def unhandled_exception(e):
-    return render_template('error/500.html'), 501
+# @error.app_errorhandler(Exception)
+# def unhandled_exception(e):
+#     return render_template('error/500.html'), 501

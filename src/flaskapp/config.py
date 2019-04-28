@@ -17,10 +17,24 @@ class DevelopmentConfig(BaseConfig):
     DEBUG = True
     TESTING = False
 
+    # POSTGRES
+    POSTGRES = {
+        'user': os.environ.get('POSTGRES_USER', 'postgres'),
+        'pw': os.environ.get('POSTGRES_PASSWORD', 'docker'),
+        'db': 'postgres',
+        'host': 'localhost',
+        'port': '5432',
+    }
+
+    # SQLAlchemy
+    SQLALCHEMY_DATABASE_URI = 'postgresql://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
 
 class TestingConfig(BaseConfig):
     DEBUG = False
     TESTING = True
+
 
 class ProdConfig(DevelopmentConfig):
     ENV = 'prod'

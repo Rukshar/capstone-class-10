@@ -22,19 +22,8 @@ def create_app(ConfigObject=DevelopmentConfig):
         else:
             config = DevelopmentConfig
 
-    # print(f"=================================")
-    # print(f"Starting up flask app")
-    # print(f"Environment: {env}")
-    # print(f"Config: {config}")
-    # print(f"=================================")
-
-
     app = Flask(__name__)
     app.config.from_object(config)
-
-    # print(f"Just checking:")
-    # print(f"SQLALCHEMY_DATABASE_URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
-    # print(f"SQLALCHEMY_TRACK_MODIFICATIONS: {app.config['SQLALCHEMY_TRACK_MODIFICATIONS']}")
 
     db.init_app(app)
 
