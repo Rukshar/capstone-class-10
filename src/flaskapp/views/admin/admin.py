@@ -1,14 +1,12 @@
 from flask import Blueprint, render_template
 import sys
 sys.path.append("../")
-
 from datetime import datetime
 import json
 from flask import request, render_template, redirect, url_for
 
 from src.jukebox.spotipy_config import CLIENT_ID, CLIENT_SECRET, USERNAME, REDIRECT_URI
 from spotipy import oauth2
-import docker
 import os
 
 from src.flaskapp.extensions import basic_auth
@@ -68,17 +66,3 @@ def callback():
 @basic_auth.required
 def login_succesful():
     return render_template('admin/login_succesful.html')
-
-@admin.route('/start_jukebox')
-@basic_auth.required
-def start_jukebox():
-    if os.path.isfile(cache_path):
-        client = docker.from_env()
-        client.containers.run("jukebox:latest", detach=True)
-
-        # todo: docker will not start from start jukebox button.
-
-        return render_template('jukebox_started')
-
-    else:
-        return redirect(url_for('admin.index'))

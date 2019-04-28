@@ -11,12 +11,6 @@ services:
     environment:
       - POSTGRES_PASSWORD=docker
       - POSTGRES_USER=postgres
-#  borrel_jukebox:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    depends_on:
-#      - borrel_database
   borrel_flask:
     build:
       context: .
@@ -25,5 +19,11 @@ services:
       - '8080:8080'
     expose:
       - 8080
+    depends_on:
+      - borrel_database
+  borrel_jukebox:
+    build:
+      context: .
+      dockerfile: Dockerfile
     depends_on:
       - borrel_database

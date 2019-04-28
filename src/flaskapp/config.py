@@ -44,8 +44,8 @@ class ProdConfig(DevelopmentConfig):
     TESTING = False
 
     SECRET_KEY = os.environ.get('SECRET_KEY')
-    BASIC_AUTH_USERNAME = os.environ.get('BASIC_AUTH_USERNAME')
-    BASIC_AUTH_PASSWORD = os.environ.get('BASIC_AUTH_PASSWORD')
+    BASIC_AUTH_USERNAME = os.environ.get('BASIC_AUTH_USERNAME', "admin")
+    BASIC_AUTH_PASSWORD = os.environ.get('BASIC_AUTH_PASSWORD', "password")
 
     # POSTGRES
     POSTGRES = {
