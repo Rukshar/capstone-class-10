@@ -5,6 +5,8 @@ class BaseConfig(object):
     DEBUG = False
     TESTING = False
 
+    BASIC_AUTH_USERNAME = os.environ.get('BASIC_AUTH_USERNAME', 'admin')
+    BASIC_AUTH_PASSWORD = os.environ.get('BASIC_AUTH_PASSWORD', 'password')
 
     SQLALCHEMY_DATABASE_URI = 'sqlite:///../db/test.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -42,6 +44,8 @@ class ProdConfig(DevelopmentConfig):
     TESTING = False
 
     SECRET_KEY = os.environ.get('SECRET_KEY')
+    BASIC_AUTH_USERNAME = os.environ.get('BASIC_AUTH_USERNAME')
+    BASIC_AUTH_PASSWORD = os.environ.get('BASIC_AUTH_PASSWORD')
 
     # POSTGRES
     POSTGRES = {

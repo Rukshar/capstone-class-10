@@ -14,6 +14,7 @@ from src.flaskapp.config import *
 def create_app(ConfigObject=DevelopmentConfig):
 
     env = os.environ.get('ENV')
+
     if ConfigObject:
         config = ConfigObject
     else:
@@ -26,9 +27,6 @@ def create_app(ConfigObject=DevelopmentConfig):
 
     app = Flask(__name__)
     app.config.from_object(config)
-
-    app.config['BASIC_AUTH_USERNAME'] = 'admin'
-    app.config['BASIC_AUTH_PASSWORD'] = 'password'
 
     db.init_app(app)
     basic_auth.init_app(app)
