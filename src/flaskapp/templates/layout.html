@@ -16,7 +16,7 @@
 <body>
 <!-- Static navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <img class="navbar-brand" href="{{ url_for('main') }}" src="{{ url_for('static', filename='img/logo_white.png') }}">
+    <img class="navbar-brand" href="{{ url_for('main.index') }}" src="{{ url_for('static', filename='img/logo_white.png') }}">
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01"
             aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation" style="">
         <span class="navbar-toggler-icon"></span>
@@ -24,11 +24,11 @@
 
     <div class="collapse navbar-collapse" id="navbarColor01">
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item{%- if request.path == url_for('main') %} active{% endif %}">
-                <a class="nav-link" href="{{ url_for('main') }}">Home</a>
+            <li class="nav-item{%- if request.path == url_for('main.index') %} active{% endif %}">
+                <a class="nav-link" href="{{ url_for('main.index') }}">Home</a>
             </li>
-            <li class="nav-item{%- if request.path == url_for('vote') %} active{% endif %}">
-                <a class="nav-link" href="{{ url_for('vote') }}">Vote</a>
+            <li class="nav-item{%- if request.path == url_for('vote.index') %} active{% endif %}">
+                <a class="nav-link" href="{{ url_for('vote.index') }}">Vote</a>
             </li>
         </ul>
     </div>
