@@ -87,7 +87,7 @@ def spotify_oauth():
 
     token_info = sp_oauth.get_cached_token()
 
-    if token_info['expires_at'] < datetime.now().timestamp():
+    if token_info and token_info['expires_at'] < datetime.now().timestamp():
         os.remove(cache_path)
         auth_url = sp_oauth.get_authorize_url()
         return redirect(auth_url)
