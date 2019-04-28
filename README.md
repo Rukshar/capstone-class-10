@@ -71,13 +71,36 @@ Last, but not least, whitelist the `http://localhost/` in the Spotify frontend a
 
 # Launching the app
 
+## Docker Compose
 
-## PostgreSQL Database
+The easiest way to launch is to use docker-compose. Make sure to adjust the value for `volumes` in the `docker-compose.yml`
+file to match your desired volume mapping. 
 
-First create a local volume for the database:
+If you choose to follow this README, adjusting is not necessary, but we have to create a local volume for the database:
 ```
 mkdir -p $HOME/docker/volumes/postgres
 ```
+
+Then to launch you can simply run the following command from project root:
+
+```
+docker-compose up
+```
+
+For now, the jukebox has to be started seperately and locally due to an authentication prompt from Spotify API. To do so
+run from root:
+
+
+```
+python run_jukebox.py
+```
+
+And follow the authentication steps.
+
+## Run seperately
+You can also choose to run the services seperately.
+ 
+#### PostgreSQL Database
 
 When launching the container we map the exposed port 5432 to our local port and map our local volume
 that we created in the previous step to the `/var/lib/postgresql/data` volume in the container:
@@ -95,19 +118,43 @@ For more background info on postgreSQL in docker look
 [here](https://hackernoon.com/dont-install-postgres-docker-pull-postgres-bee20e200198)
 
 
-## Webapp
+### Webapp
 
-To start the flask app, simply run: 
 
-```python run_flask.py```
+##### Development server
+
+To start the flask app on a development server, simply run: 
+
+```
+python run_flask.py
+```
+
+
+##### WSGI server
+
+For `gunicorn`:
+
+```
+gunicorn -w 4 -b 0.0.0.0:8080 src.flaskapp.app:app
+```
+
+For `gevent`:
+
+```
+python run_flask_gevent.py
+```
+
+
 
 After launching, the Flask app is available at:
  
  `http://localhost:5000`
 
 
-## Jukebox
+#### Jukebox
 
 To launch the jukebox, simply run:
 
-```python run_jukebox.py```
+```
+python run_jukebox.py
+```
