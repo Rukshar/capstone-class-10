@@ -7,7 +7,6 @@ class BaseConfig(object):
 
 
     SQLALCHEMY_DATABASE_URI = 'sqlite:///../db/test.db'
-    # SQLALCHEMY_DATABASE_URI = 'sqlite:///../db/test.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     SECRET_KEY = os.environ.get('SECRET_KEY', 'secret-key') #TODO Change me
@@ -17,19 +16,6 @@ class DevelopmentConfig(BaseConfig):
     ENV = 'dev'
     DEBUG = True
     TESTING = False
-
-    # POSTGRES
-    POSTGRES = {
-        'user': 'postgres',
-        'pw': 'docker',
-        'db': 'postgres',
-        'host': 'localhost',
-        'port': '5432',
-    }
-
-    # SQLAlchemy
-    SQLALCHEMY_DATABASE_URI = 'postgresql://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
 class TestingConfig(BaseConfig):

@@ -16,19 +16,20 @@ def index():
     now = datetime.now()
     vote_round = db.session.query(Round).filter(and_(Round.start_date <= now, Round.end_date >= now)).first()
 
-    if not vote_round:
+    if vote_round is None:
         return render_template('error/not_active.html')
-    else:
-        selected_songs = db.session.query(SelectedSongs, Songs).filter_by(round_id=vote_round.id).join(Songs).all()
 
-        return render_template('vote/vote.html', songs=selected_songs)
+    selected_songs = db.session.query(SelectedSongs, Songs).filter_by(round_id=vote_round.id).join(Songs).all()
+    return render_template('vote/vote.html', songs=selected_songs)
 
 
 @vote.route('/vote_song')
 def vote_song():
-    # Check whether a round is active, start one if not
     now = datetime.now()
     vote_round = db.session.query(Round).filter(and_(Round.start_date <= now, Round.end_date >= now)).first()
+
+    if vote_round is None:
+        return render_template('error/not_active.html')
 
     vote_id = int(request.args['song_id'])
     round_id = int(request.args['round_id'])
@@ -48,11 +49,6 @@ def vote_song():
             return redirect(url_for('vote.vote_redirect'))
     else:
         return redirect(url_for('vote.expired'))
-
-@vote.route('/test')
-def vote_test():
-    return render_template('vote/voted.html')
-
 
 @vote.route('/vote_redirect')
 def vote_redirect():

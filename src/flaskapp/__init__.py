@@ -39,6 +39,7 @@ def create_app(ConfigObject=DevelopmentConfig):
     db.init_app(app)
 
     with app.app_context():
+        db.create_all()
         db.Model.metadata.reflect(db.engine)
 
     register_blueprints(app)
