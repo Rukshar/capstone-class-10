@@ -1,5 +1,4 @@
 import unittest
-import os
 import datetime
 
 from sqlalchemy.engine import create_engine
@@ -7,11 +6,22 @@ from sqlalchemy.orm import sessionmaker
 
 from src.db.objects import Base, Songs, Votes, Round, SelectedSongs
 from src.flaskapp import create_app
-from flask import request
 
 from src.flaskapp.config import TestingConfig
 
 from unittest.mock import patch, Mock
+
+# fix for TravisCI missing spotipy config file
+# Store original __import__ and the mock import
+orig_import = __import__
+mock_import = Mock()
+
+
+def import_mock(name, *args, **kwargs):
+    if name == 'src.jukebox.spotipy_config':
+        return mock_import
+    return orig_import(name, *args, **kwargs)
+
 
 class TestFlaskapp(unittest.TestCase):
 

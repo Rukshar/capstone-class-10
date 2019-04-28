@@ -1,9 +1,9 @@
 body {
-    background-color: #222326;
+    background-color: #ffffff;
 }
 
 h1 {
-    color: #1DB954;
+    color: #ffffff;
     font-family: 'Raleway', sans-serif;
 }
 
@@ -22,9 +22,9 @@ h1 {
 }
 
 .btn-primary {
-    color: #fff !important;
-    background-color: #1DB954 !important;
-    border-color: #1DB954 !important;
+    color: #223284 !important;
+    background-color: #ffffff !important;
+    border-color: #6384d0#6 !important;
 }
 .view-logo img {
      max-width: 100%;
