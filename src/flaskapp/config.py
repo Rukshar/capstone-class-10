@@ -22,7 +22,7 @@ class DevelopmentConfig(BaseConfig):
         'user': os.environ.get('POSTGRES_USER', 'postgres'),
         'pw': os.environ.get('POSTGRES_PASSWORD', 'docker'),
         'db': 'postgres',
-        'host': 'localhost',
+        'host': '0.0.0.0',
         'port': '5432',
     }
 
@@ -48,7 +48,7 @@ class ProdConfig(DevelopmentConfig):
         'user': os.environ.get('POSTGRES_USER'),
         'pw': os.environ.get('POSTGRES_PASSWORD'),
         'db': 'postgres',
-        'host': 'localhost',
+        'host': 'borrel_database',
         'port': '5432',
     }
 
