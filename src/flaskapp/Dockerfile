@@ -2,6 +2,8 @@ FROM python:3.7-slim
 
 # set correct timezone for scheduler
 ENV TZ Europe/Amsterdam
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_PASSWORD=docker
 
 # set /app as working directory
 ENV APP_DIR /app
@@ -20,6 +22,6 @@ EXPOSE 8080
 # CMD ["python", "serve_gevent.py"]
 
 # Run with gunicorn
-ENTRYPOINT ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "4" , "--log-level", "debug", "src.flaskapp.app:app"]
+ENTRYPOINT ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "4" , "--log-level", "debug", "src.flaskapp.wsgi:app"]
 
 
