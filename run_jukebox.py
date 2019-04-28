@@ -16,6 +16,7 @@ jukebox = JukeBox(username=USERNAME,
 wait_for_spotify_login = True
 
 if __name__ == '__main__':
+    print('Waiting for Spotify Login')
     while wait_for_spotify_login:
         if os.path.isfile(cache_path):
             token = json.load(open(cache_path))
