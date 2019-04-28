@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container">
+    <h1>Voting round expired! You will be redirected shortly.</h1>
+
+        <script>
+    setTimeout(function(){
+        window.location.href = '/vote';
+    }, 2000);
+    </script>
+</div>
+
+{% endblock %}

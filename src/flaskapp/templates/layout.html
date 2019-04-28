@@ -16,19 +16,22 @@
 <body>
 <!-- Static navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <img class="navbar-brand" href="{{ url_for('main') }}" src="{{ url_for('static', filename='img/logo_white.png') }}">
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01"
-            aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation" style="">
+    <img class="navbar-brand" href="{{ url_for('main.index') }}" src="{{ url_for('static', filename='img/logo_white.png') }}">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent">
         <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-collapse" id="navbarColor01">
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item{%- if request.path == url_for('main') %} active{% endif %}">
-                <a class="nav-link" href="{{ url_for('main') }}">Home</a>
+            <li class="nav-item{%- if request.path == url_for('main.index') %} active{% endif %}">
+                <a class="nav-link" href="{{ url_for('main.index') }}">Home</a>
             </li>
-            <li class="nav-item{%- if request.path == url_for('vote') %} active{% endif %}">
-                <a class="nav-link" href="{{ url_for('vote') }}">Vote</a>
+            <li class="nav-item{%- if request.path == url_for('vote.index') %} active{% endif %}">
+                <a class="nav-link" href="{{ url_for('vote.index') }}">Vote</a>
+            </li>
+            <li class="nav-item{%- if request.path == url_for('admin.index') %} active{% endif %}">
+                <a class="nav-link" href="{{ url_for('admin.index') }}">Admin</a>
             </li>
         </ul>
     </div>
@@ -40,6 +43,15 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/app.js') }}"></script>
 
 
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
 
     <div class="content">
         <!-- flash messages -->
@@ -83,7 +95,7 @@
 </div>
 <!-- /.container -->
 
-<!--<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>-->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
         integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
         crossorigin="anonymous"></script>

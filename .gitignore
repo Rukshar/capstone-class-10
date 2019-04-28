@@ -25,3 +25,5 @@ spotipy_config.py
 *.mp3
 *.m4a
 *.wav
+
+*.cache*

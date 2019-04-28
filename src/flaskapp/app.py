@@ -74,65 +74,7 @@ def already_voted():
     return render_template('already.html')
 
 
-@app.route('/admin')
-def admin():
-    return render_template('admin.html')
 
-
-@app.route("/login")
-def spotify_oauth():
-    # Auth Step 1: Authorization
-    sp_oauth = oauth2.SpotifyOAuth(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI,
-                                   scope=scope, cache_path=cache_path)
-
-    token_info = sp_oauth.get_cached_token()
-
-    if token_info and token_info['expires_at'] < datetime.now().timestamp():
-        os.remove(cache_path)
-        auth_url = sp_oauth.get_authorize_url()
-        return redirect(auth_url)
-
-    elif not token_info:
-        auth_url = sp_oauth.get_authorize_url()
-        return redirect(auth_url)
-
-    else:
-        return redirect(url_for('login_succesful'))
-
-
-@app.route("/callback/q")
-def callback():
-    # Auth Step 4: Requests refresh and access tokens
-    sp_oauth = oauth2.SpotifyOAuth(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI,
-                                   scope=scope, cache_path=cache_path)
-
-    token_info = sp_oauth.get_cached_token()
-    if not token_info:
-        code = request.args['code']
-        token = sp_oauth.get_access_token(code)
-
-        with open(cache_path, 'w') as file:
-            file.write(json.dumps(token))
-
-    return redirect(url_for('login_succesful'))
-
-@app.route('/login_succesful')
-def login_succesful():
-    return render_template('login_succesful.html')
-
-
-@app.route('/start_jukebox')
-def start_jukebox():
-    if os.path.isfile(cache_path):
-        client = docker.from_env()
-        client.containers.run("jukebox:latest", detach=True)
-
-        # todo: docker will not start from start jukebox button.
-
-        return render_template('jukebox_started')
-
-    else:
-        return redirect(url_for('admin'))
 
 
 if __name__ == '__main__':
