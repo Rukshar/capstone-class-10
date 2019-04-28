@@ -3,7 +3,6 @@ from sqlalchemy import Column, String, Float, Integer, DateTime, ForeignKey, Seq
 
 Base = declarative_base()
 
-
 class Songs(Base):
     """
     Info on all possible songs
