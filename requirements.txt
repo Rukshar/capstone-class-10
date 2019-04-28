@@ -21,3 +21,4 @@ psycopg2-binary
 spotipy==2.4.4
 gevent
 gunicorn
+flask_basicauth
