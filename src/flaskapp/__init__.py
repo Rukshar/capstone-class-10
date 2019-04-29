@@ -9,7 +9,7 @@ from src.flaskapp.views.admin.admin import admin
 from src.flaskapp.extensions import db
 from src.flaskapp.extensions import basic_auth
 from src.flaskapp.config import *
-
+from dotenv import load_dotenv
 
 def create_app():
 

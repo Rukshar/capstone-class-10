@@ -12,10 +12,12 @@ from src.db.objects import Base, Songs, Votes, Round, SelectedSongs
 from src.db.populate import populate
 from apscheduler.schedulers.background import BlockingScheduler
 from src.jukebox.config import *
-
+from dotenv import load_dotenv
 
 class JukeBox:
     def __init__(self):
+
+        load_dotenv()
         env = os.environ.get('ENV')
         if env is None:
             raise ValueError('No environment specified')
@@ -31,7 +33,6 @@ class JukeBox:
 
         self.config = config
 
-        self.engine = None
         self.session = None
 
         self.token = None
@@ -42,14 +43,14 @@ class JukeBox:
         self.scheduler = None
         self.vote_round = None
 
-    def init_db(self):
-        self.engine = create_engine(self.config.SQLALCHEMY_DATABASE_URI, echo=False)
-        Session = sessionmaker(bind=self.engine)
+    def _init_db(self):
+        engine = create_engine(self.config.SQLALCHEMY_DATABASE_URI, echo=False)
+        Session = sessionmaker(bind=engine)
         self.session = Session()
 
         # empty db and start new schema
-        Base.metadata.drop_all(self.engine)
-        Base.metadata.create_all(self.engine)
+        Base.metadata.drop_all(engine)
+        Base.metadata.create_all(engine)
         self.session.commit()
 
         return None
@@ -73,7 +74,7 @@ class JukeBox:
         return None
     
     def _spotify_refresh_token(self):
-        # TODO Pycharm error
+
         if self.spotify_oauth._is_token_expired(self.token):
             self.token = self.spotify_oauth.refresh_access_token(self.token['refresh_token'])
             self.spotify = spotipy.Spotify(auth=self.token['access_token'])
@@ -89,7 +90,7 @@ class JukeBox:
         # check if playlist exists
         playlists = self.spotify.user_playlists(self.config.SPOTIFY_USERNAME)
         if not playlists['items']:
-            return self.make_new_playlist(target_playlist_title)
+            self.make_new_playlist(target_playlist_title)
         else:
             for p in playlists['items']:
                 if p['name'] == target_playlist_title:
@@ -97,7 +98,8 @@ class JukeBox:
                     return None
                 # otherwise create playlist and retrieve the id
                 else:
-                    return self.make_new_playlist(target_playlist_title)
+                    self.make_new_playlist(target_playlist_title)
+                    return None
 
     def make_new_playlist(self, playlist_title):
         print("Making new playlist...")
@@ -115,7 +117,7 @@ class JukeBox:
         """
         :return: None
         """
-        print('starting jukebox')
+        print('Starting jukebox')
         cache_path = ".cache-{}".format(self.config.SPOTIFY_USERNAME)
         wait_for_spotify_login = True
         while wait_for_spotify_login:
@@ -129,7 +131,7 @@ class JukeBox:
             else:
                 time.sleep(5)
 
-        self.init_db()
+        self._init_db()
 
         # login to spotify
         self._spotify_login()
@@ -145,14 +147,13 @@ class JukeBox:
         populate(self.session, playlist)
 
         # start playing music
-        _ = self.setup_new_round(first_round=True)
+        self.setup_new_round(first_round=True)
 
         first_round = datetime.now() + timedelta(minutes=0, seconds=1)
         self.scheduler = BlockingScheduler(timezone="CET")
 
         # first songs starts after first round of voting (1 minute)
         self.scheduler.add_job(self.play_next_song, 'date', run_date=first_round)
-        print('Starting Jukebox')
         self.scheduler.start()
 
     def count_votes_current_round(self):
@@ -172,12 +173,11 @@ class JukeBox:
     def determine_winning_song_current_round(self, database_row_with_votes_per_song):
         if len(database_row_with_votes_per_song) > 0:
             winner = max(database_row_with_votes_per_song, key=itemgetter(0))[2]
-            #TODO: Remove returned votes object instead of indexing to 2?
         else:
             winner = self.select_random_song_from_database()
         return winner
 
-    def select_random_song_from_database(self, vote_round):
+    def select_random_song_from_database(self):
         random_song_id = self.session.query(SelectedSongs).filter(
             SelectedSongs.round_id == self.vote_round.id).order_by(func.random()).first().song_id
         winner = self.session.query(Songs).filter(Songs.id == random_song_id).first()
@@ -189,10 +189,6 @@ class JukeBox:
         2. Call count votes
         3. Setup New Round
         4. Play next song
-
-        :param session_obj: db session object
-        :param scheduler: apschedular object
-        :param music_folder: path to music
 
         :return: None
         """
@@ -216,7 +212,6 @@ class JukeBox:
 
     def setup_new_round(self, first_round=False, song=None):
         """
-        :param session: db session object
         :param first_round: Default: False. True if this is the first round to setup in jukebox session,
         :param song: song object to determine new round end
         :return:

@@ -1,5 +1,6 @@
 import os
 
+
 class BaseConfig(object):
     DEBUG = False
     TESTING = False
@@ -17,14 +18,15 @@ class BaseConfig(object):
     SQLALCHEMY_DATABASE_URI = 'postgresql://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    SPOTIFY_CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID', '99aa66a4fbf04bb097f6c1b4801cecbc')
-    SPOTIFY_CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET', 'c7109ecb0e7d4a6c999634a16fe13150')
+    SPOTIFY_CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
+    SPOTIFY_CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET')
 
-    SPOTIFY_USERNAME = os.environ.get('SPOTIFY_USERNAME', '113566434')
-    SPOTIFY_SOURCE_PLAYLIST_URI = os.environ.get('SPOTIFY_SOURCE_PLAYLIST_URI', '44x9Ip9p7A9Po4nXVgiPsZ')
-    SPOTIFY_REDIRECT_URI = os.environ.get('SPOTIFY_REDIRECT_URI', 'http://localhost/')
+    SPOTIFY_USERNAME = os.environ.get('SPOTIFY_USERNAME')
+    SPOTIFY_SOURCE_PLAYLIST_URI = os.environ.get('SPOTIFY_SOURCE_PLAYLIST_URI')
+    SPOTIFY_REDIRECT_URI = os.environ.get('SPOTIFY_REDIRECT_URI')
 
     SCOPE = 'playlist-modify-public playlist-modify-private'
+
 
 class DevConfig(BaseConfig):
     ENV = 'dev'

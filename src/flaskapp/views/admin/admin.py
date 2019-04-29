@@ -3,7 +3,6 @@ from flask import Blueprint, render_template
 from datetime import datetime
 import json
 from flask import request, render_template, redirect, url_for
-from src.jukebox.config import DevConfig as config
 from spotipy import oauth2
 from src.flaskapp.extensions import basic_auth
 
@@ -20,11 +19,14 @@ def index():
 @basic_auth.required
 def spotify_oauth():
     scope = 'playlist-modify-public playlist-modify-private'
-    cache_path = ".cache-{}".format(config.SPOTIFY_USERNAME)
+    cache_path = ".cache-{}".format(os.environ.get('SPOTIFY_USERNAME'))
 
     # Auth Step 1: Authorization
-    sp_oauth = oauth2.SpotifyOAuth(config.SPOTIFY_CLIENT_ID, config.SPOTIFY_CLIENT_SECRET, config.SPOTIFY_REDIRECT_URI,
-                                   scope=scope, cache_path=cache_path)
+    sp_oauth = oauth2.SpotifyOAuth(os.environ.get('SPOTIFY_CLIENT_ID'),
+                                   os.environ.get('SPOTIFY_CLIENT_SECRET'),
+                                   os.environ.get('SPOTIFY_REDIRECT_URI'),
+                                   scope=scope,
+                                   cache_path=cache_path)
 
     token_info = sp_oauth.get_cached_token()
 
@@ -45,11 +47,14 @@ def spotify_oauth():
 @basic_auth.required
 def callback():
     scope = 'playlist-modify-public playlist-modify-private'
-    cache_path = ".cache-{}".format(config.SPOTIFY_USERNAME)
+    cache_path = ".cache-{}".format(os.environ.get('SPOTIFY_USERNAME'))
 
     # Auth Step 4: Requests refresh and access tokens
-    sp_oauth = oauth2.SpotifyOAuth(config.SPOTIFY_CLIENT_ID, config.SPOTIFY_CLIENT_SECRET, config.SPOTIFY_REDIRECT_URI,
-                                   scope=scope, cache_path=cache_path)
+    sp_oauth = oauth2.SpotifyOAuth(os.environ.get('SPOTIFY_CLIENT_ID'),
+                                   os.environ.get('SPOTIFY_CLIENT_SECRET'),
+                                   os.environ.get('SPOTIFY_REDIRECT_URI'),
+                                   scope=scope,
+                                   cache_path=cache_path)
 
     token_info = sp_oauth.get_cached_token()
     if not token_info:
