@@ -7,6 +7,7 @@ from src.jukebox.spotipy_config import USERNAME, TARGET_PLAYLIST_URI, SOURCE_PLA
 # db_uri = 'postgresql://postgres:docker@localhost:5432/postgres'
 db_uri = 'postgresql://postgres:docker@borrel_database:5432/postgres'
 
+
 cache_path = ".cache-{}".format(USERNAME)
 
 jukebox = JukeBox(username=USERNAME,

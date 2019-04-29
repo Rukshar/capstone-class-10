@@ -119,7 +119,7 @@ class JukeBox:
         _ = self.setup_new_round(first_round=True)
 
         first_round = datetime.now() + timedelta(minutes=0, seconds=1)
-        self.scheduler = BlockingScheduler(timezone="CET and")
+        self.scheduler = BlockingScheduler(timezone="CET")
 
         # first songs starts after first round of voting (1 minute)
         self.scheduler.add_job(self.play_next_song, 'date', run_date=first_round)
@@ -151,7 +151,7 @@ class JukeBox:
 
     def select_random_song_from_database(self):
         random_song_id = self.session.query(SelectedSongs).filter(
-            SelectedSongs.round_id == self.vote_round.id).first().song_id
+            SelectedSongs.round_id == self.vote_round.id).order_by(func.random()).first().song_id
         winner = self.session.query(Songs).filter(Songs.id == random_song_id).first()
         return winner
 
