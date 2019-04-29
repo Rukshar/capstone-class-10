@@ -11,10 +11,16 @@ class BaseConfig(object):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///../db/test.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'secret-key') #TODO Change me
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'dummy-key')
 
 
-class DevelopmentConfig(BaseConfig):
+class TestConfig(BaseConfig):
+    ENV = 'test'
+    DEBUG = False
+    TESTING = True
+
+
+class DevConfig(BaseConfig):
     ENV = 'dev'
     DEBUG = True
     TESTING = False
@@ -33,19 +39,14 @@ class DevelopmentConfig(BaseConfig):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
-class TestingConfig(BaseConfig):
-    DEBUG = False
-    TESTING = True
-
-
-class ProdConfig(DevelopmentConfig):
+class ProdConfig(DevConfig):
     ENV = 'prod'
     DEBUG = False
     TESTING = False
 
     SECRET_KEY = os.environ.get('SECRET_KEY')
-    BASIC_AUTH_USERNAME = os.environ.get('BASIC_AUTH_USERNAME', "admin")
-    BASIC_AUTH_PASSWORD = os.environ.get('BASIC_AUTH_PASSWORD', "password")
+    BASIC_AUTH_USERNAME = os.environ.get('BASIC_AUTH_USERNAME')
+    BASIC_AUTH_PASSWORD = os.environ.get('BASIC_AUTH_PASSWORD')
 
     # POSTGRES
     POSTGRES = {

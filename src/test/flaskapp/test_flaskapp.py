@@ -1,29 +1,19 @@
-import unittest
 import datetime
+import os
 
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from src.db.objects import Base, Songs, Votes, Round, SelectedSongs
 from src.flaskapp import create_app
-
 from src.flaskapp.config import TestingConfig
 
+import unittest
 from unittest.mock import patch, Mock
 
 
 orig_import = __import__
 mock_import = Mock()
-
-
-def import_mock(name, *args, **kwargs):
-    if name == 'src.jukebox.spotipy_config':
-        return mock_import
-    return orig_import(name, *args, **kwargs)
-
-
-with patch('builtins.__import__', side_effect=import_mock):
-    from src.flaskapp.views.admin.admin import admin
 
 
 class TestFlaskapp(unittest.TestCase):
@@ -46,6 +36,7 @@ class TestFlaskapp(unittest.TestCase):
     def tearDown(self):
         self.session.flush()
         Base.metadata.drop_all(self.engine)
+        os.remove('src/db/test.db')
 
 
     def test_main_page(self):

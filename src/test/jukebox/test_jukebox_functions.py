@@ -1,50 +1,36 @@
-import unittest
-import sys
-from sqlalchemy import and_, func, create_engine
+import datetime
+
+from sqlalchemy import and_, func
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm import sessionmaker
-from unittest.mock import patch, Mock
-import builtins
 
-import datetime
 from src.db.objects import Base, Songs, Votes, Round, SelectedSongs
 
-# fix for TravisCI missing spotipy config file
-# Store original __import__ and the mock import
-orig_import = __import__
-mock_import = Mock()
-
-
-def import_mock(name, *args, **kwargs):
-    if name == 'src.jukebox.spotipy_config':
-        return mock_import
-    return orig_import(name, *args, **kwargs)
-
-
-with patch('builtins.__import__', side_effect=import_mock):
-    from src.jukebox.jukebox_functions import JukeBox
+import unittest
+from unittest.mock import patch, Mock
+from src.jukebox.jukebox import JukeBox
 
 
 class TestJukebox(unittest.TestCase):
     @patch('src.jukebox.jukebox_functions.JukeBox.init_db')
     def setUp(self, MockInitDb):
-        engine = create_engine('sqlite:///:memory:', echo=True)
+        engine = create_engine('sqlite:///src/db/test.db', echo=True)
         Base.metadata.create_all(engine)
         Session = sessionmaker(bind=engine)
 
         self.session = Session()
         self.session.flush()
 
-        self.session.add(Songs('testSong','testArtist','testFilename', 40.0))
+        self.session.add(Songs('testSong', 'testArtist', 'testFilename', 40.0))
         self.session.add(Songs('testSong2', 'testArtist2', 'testFilename2', 87.0))
         self.session.add(Round(datetime.datetime(2019, 5, 1, 0, 0, 0), datetime.datetime(2019, 5, 1, 0, 0, 10)))
-        self.session.add(Votes(1,1))
-        self.session.add(Votes(2,1))
-        self.session.add(Votes(1,1))
-        self.session.add(SelectedSongs(1,1))
-        self.session.add(SelectedSongs(2,1))
-        self.session.add(SelectedSongs(3,1))
-        self.session.add(SelectedSongs(4,1))
+        self.session.add(Votes(1, 1))
+        self.session.add(Votes(2, 1))
+        self.session.add(Votes(1, 1))
+        self.session.add(SelectedSongs(1, 1))
+        self.session.add(SelectedSongs(2, 1))
+        self.session.add(SelectedSongs(3, 1))
+        self.session.add(SelectedSongs(4, 1))
 
         self.session.commit()
 
@@ -60,7 +46,7 @@ class TestJukebox(unittest.TestCase):
         counted_votes = self.jukebox.count_votes_current_round()
         counted_votes = [(v[2].id, v[0]) for v in counted_votes]
 
-        truth = [(1,1), (2,1), (1,1)]
+        truth = [(1, 1), (2, 1), (1, 1)]
 
         return self.assertEqual(truth, counted_votes)
 

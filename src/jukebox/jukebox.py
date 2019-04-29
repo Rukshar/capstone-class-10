@@ -1,12 +1,9 @@
 # coding: utf-8
-import sys
-sys.path.append("../")
+import time
 import json
 import random
 import spotipy
-import spotipy.util as util
 import spotipy.oauth2 as oauth2
-
 from datetime import datetime, timedelta
 from operator import itemgetter
 from sqlalchemy import and_, func, create_engine
@@ -14,45 +11,69 @@ from sqlalchemy.orm import sessionmaker
 from src.db.objects import Base, Songs, Votes, Round, SelectedSongs
 from src.db.populate import populate
 from apscheduler.schedulers.background import BlockingScheduler
+from src.jukebox.config import *
 
-from src.jukebox.spotipy_config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, USERNAME
 
 class JukeBox:
-    def __init__(self, username, source_playlist_uri, db_uri):
-        self.username = username
-        self.scope='playlist-modify-public playlist-modify-private'
+    def __init__(self):
+        env = os.environ.get('ENV')
+        if env is None:
+            raise ValueError('No environment specified')
+
+        if env == 'prod':
+            config = ProdConfig
+        elif env == 'test':
+            config = TestConfig
+        elif env == 'dev':
+            config = DevConfig
+        else:
+            raise ValueError('Configuration not loaded')
+
+        self.config = config
+
+        self.engine = None
+        self.session = None
+
+        self.token = None
+        self.spotify = None
+        self.spotify_oauth = None
         self.target_playlist_uri = None
-        self.source_playlist_uri = source_playlist_uri
-        self.session = self.init_db(db_uri)
 
+        self.scheduler = None
+        self.vote_round = None
 
-    def init_db(self, db_uri):
-        self.engine = create_engine(db_uri, echo=False)
-        self.Session = sessionmaker(bind=self.engine)
-        self.session = self.Session()
+    def init_db(self):
+        self.engine = create_engine(self.config.SQLALCHEMY_DATABASE_URI, echo=False)
+        Session = sessionmaker(bind=self.engine)
+        self.session = Session()
 
-        return self.session
+        # empty db and start new schema
+        Base.metadata.drop_all(self.engine)
+        Base.metadata.create_all(self.engine)
+        self.session.commit()
 
-    def _spotify_login(self, client_id=CLIENT_ID, client_secret=CLIENT_SECRET, redirect_uri=REDIRECT_URI):
-        scope = 'playlist-modify-public playlist-modify-private'
-        cache_path = '.cache-{}'.format(self.username)
+        return None
+
+    def _spotify_login(self):
+        cache_path = '.cache-{}'.format(self.config.SPOTIFY_USERNAME)
 
         self.token = json.load(open(cache_path))
         
-        # spotify object for querying playlists and adding new songs
+        # spotify object for querying playlists and adding new  songs
         self.spotify = spotipy.Spotify(auth=self.token['access_token'])
         
         # spotify oauth object for token refreshing
-        self.spotify_oauth = oauth2.SpotifyOAuth(client_id=client_id, 
-                                                         client_secret=client_secret, 
-                                                         redirect_uri=redirect_uri,
-                                                         scope=self.scope,
-                                                         cache_path = cache_path
-                                                        )
+        self.spotify_oauth = oauth2.SpotifyOAuth(client_id=self.config.SPOTIFY_CLIENT_ID,
+                                                 client_secret=self.config.SPOTIFY_CLIENT_SECRET,
+                                                 redirect_uri=self.config.SPOTIFY_REDIRECT_URI,
+                                                 scope=self.config.SCOPE,
+                                                 cache_path=cache_path
+                                                 )
         print("Spotify login succeeded.")
         return None
     
     def _spotify_refresh_token(self):
+        # TODO Pycharm error
         if self.spotify_oauth._is_token_expired(self.token):
             self.token = self.spotify_oauth.refresh_access_token(self.token['refresh_token'])
             self.spotify = spotipy.Spotify(auth=self.token['access_token'])
@@ -66,7 +87,7 @@ class JukeBox:
                                                              today.day)
         print("Finding target playlist...")
         # check if playlist exists
-        playlists = self.spotify.user_playlists(self.username)
+        playlists = self.spotify.user_playlists(self.config.SPOTIFY_USERNAME)
         if not playlists['items']:
             return self.make_new_playlist(target_playlist_title)
         else:
@@ -80,35 +101,43 @@ class JukeBox:
 
     def make_new_playlist(self, playlist_title):
         print("Making new playlist...")
-        self.spotify.user_playlist_create(self.username, playlist_title)
+        self.spotify.user_playlist_create(self.config.SPOTIFY_USERNAME, playlist_title)
 
         # retreive playlist uri of the new playlist for playback
-        playlists = self.spotify.user_playlists(self.username)
+        playlists = self.spotify.user_playlists(self.config.SPOTIFY_USERNAME)
         print("Made playlist {}".format(playlists['items'][0]['name']))
 
         target_playlist = [p for p in playlists['items'] if p['name'] == playlist_title]
         self.target_playlist_uri = target_playlist[0]['id']
         return None
 
-
     def start_jukebox(self):
         """
-        :param music_folder: string, path to music
-        :param db_path: string, path to store database
         :return: None
         """
-        # empty db and start new schema
-        Base.metadata.drop_all(self.engine)
-        Base.metadata.create_all(self.engine)
-        self.session.commit()
+        print('starting jukebox')
+        cache_path = ".cache-{}".format(self.config.SPOTIFY_USERNAME)
+        wait_for_spotify_login = True
+        while wait_for_spotify_login:
+            if os.path.isfile(cache_path):
+                token = json.load(open(cache_path))
+                if token['expires_at'] > int(datetime.now().timestamp()):
+                    wait_for_spotify_login = False
+                else:
+                    os.remove(cache_path)
+
+            else:
+                time.sleep(5)
+
+        self.init_db()
 
         # login to spotify
         self._spotify_login()
         self._create_spotify_target_playlist()
 
         # get source playlist_content and populate database
-        playlist = self.spotify.user_playlist(self.username,
-                                              self.source_playlist_uri,
+        playlist = self.spotify.user_playlist(self.config.SPOTIFY_USERNAME,
+                                              self.config.SPOTIFY_SOURCE_PLAYLIST_URI,
                                               fields=['tracks'])
 
         playlist = playlist['tracks']['items']
@@ -128,7 +157,6 @@ class JukeBox:
 
     def count_votes_current_round(self):
         """
-        :param session: db session object
         :return: object, database row with info of most voted song
         """
         now = datetime.now()
@@ -149,7 +177,7 @@ class JukeBox:
             winner = self.select_random_song_from_database()
         return winner
 
-    def select_random_song_from_database(self):
+    def select_random_song_from_database(self, vote_round):
         random_song_id = self.session.query(SelectedSongs).filter(
             SelectedSongs.round_id == self.vote_round.id).order_by(func.random()).first().song_id
         winner = self.session.query(Songs).filter(Songs.id == random_song_id).first()
@@ -182,7 +210,9 @@ class JukeBox:
         self.play_winning_song(track_uri)
 
     def play_winning_song(self, track_uri):
-        self.spotify.user_playlist_add_tracks(self.username, self.target_playlist_uri, track_uri)
+        self.spotify.user_playlist_add_tracks(self.config.SPOTIFY_USERNAME,
+                                              self.target_playlist_uri,
+                                              track_uri)
 
     def setup_new_round(self, first_round=False, song=None):
         """
@@ -209,8 +239,6 @@ class JukeBox:
 
         self.session.add(vote_round)
 
-        # new query to gain current round id. Why?
-        # todo: check if this is best practice
         current_round = self.session.query(Round).order_by(Round.id.desc()).first()
 
         for song in selected_song_ids:

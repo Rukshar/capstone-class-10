@@ -11,19 +11,20 @@ from src.flaskapp.extensions import basic_auth
 from src.flaskapp.config import *
 
 
-def create_app(ConfigObject=ProdConfig):
+def create_app():
 
     env = os.environ.get('ENV')
+    if env is None:
+        raise ValueError('No environment specified')
 
-    if ConfigObject:
-        config = ConfigObject
+    if env == 'prod':
+        config = ProdConfig
+    elif env == 'test':
+        config = TestConfig
+    elif env == 'dev':
+        config = DevConfig
     else:
-        if env == 'production':
-            config = ProdConfig
-        elif env == 'testing':
-            config = TestingConfig
-        elif env == 'development':
-            config = DevelopmentConfig
+        raise ValueError('Configuration not loaded')
 
     app = Flask(__name__)
     app.config.from_object(config)

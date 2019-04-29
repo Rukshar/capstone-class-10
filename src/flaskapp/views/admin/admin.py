@@ -1,20 +1,13 @@
+import os
 from flask import Blueprint, render_template
-import sys
-sys.path.append("../")
 from datetime import datetime
 import json
 from flask import request, render_template, redirect, url_for
-
-from src.jukebox.spotipy_config import CLIENT_ID, CLIENT_SECRET, USERNAME, REDIRECT_URI
+from src.jukebox.config import DevConfig as config
 from spotipy import oauth2
-import os
-
 from src.flaskapp.extensions import basic_auth
 
 admin = Blueprint('admin', __name__, url_prefix='/admin')
-
-scope = 'playlist-modify-public playlist-modify-private'
-cache_path = ".cache-{}".format(USERNAME)
 
 
 @admin.route('/')
@@ -26,8 +19,11 @@ def index():
 @admin.route("/login")
 @basic_auth.required
 def spotify_oauth():
+    scope = 'playlist-modify-public playlist-modify-private'
+    cache_path = ".cache-{}".format(config.SPOTIFY_USERNAME)
+
     # Auth Step 1: Authorization
-    sp_oauth = oauth2.SpotifyOAuth(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI,
+    sp_oauth = oauth2.SpotifyOAuth(config.SPOTIFY_CLIENT_ID, config.SPOTIFY_CLIENT_SECRET, config.SPOTIFY_REDIRECT_URI,
                                    scope=scope, cache_path=cache_path)
 
     token_info = sp_oauth.get_cached_token()
@@ -48,8 +44,11 @@ def spotify_oauth():
 @admin.route("/callback/q")
 @basic_auth.required
 def callback():
+    scope = 'playlist-modify-public playlist-modify-private'
+    cache_path = ".cache-{}".format(config.SPOTIFY_USERNAME)
+
     # Auth Step 4: Requests refresh and access tokens
-    sp_oauth = oauth2.SpotifyOAuth(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI,
+    sp_oauth = oauth2.SpotifyOAuth(config.SPOTIFY_CLIENT_ID, config.SPOTIFY_CLIENT_SECRET, config.SPOTIFY_REDIRECT_URI,
                                    scope=scope, cache_path=cache_path)
 
     token_info = sp_oauth.get_cached_token()
