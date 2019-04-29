@@ -5,6 +5,7 @@ import json
 import random
 import spotipy
 import spotipy.util as util
+import spotipy.oauth2 as oauth2
 
 from datetime import datetime, timedelta
 from operator import itemgetter
@@ -19,6 +20,7 @@ from src.jukebox.spotipy_config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, U
 class JukeBox:
     def __init__(self, username, source_playlist_uri, db_uri):
         self.username = username
+        self.scope='playlist-modify-public playlist-modify-private'
         self.target_playlist_uri = None
         self.source_playlist_uri = source_playlist_uri
         self.session = self.init_db(db_uri)
@@ -35,10 +37,26 @@ class JukeBox:
         scope = 'playlist-modify-public playlist-modify-private'
         cache_path = '.cache-{}'.format(self.username)
 
-        token = json.load(open(cache_path))
-
-        self.spotify = spotipy.Spotify(auth=token['access_token'])
+        self.token = json.load(open(cache_path))
+        
+        # spotify object for querying playlists and adding new songs
+        self.spotify = spotipy.Spotify(auth=self.token['access_token'])
+        
+        # spotify oauth object for token refreshing
+        self.spotify_oauth = oauth2.SpotifyOAuth(client_id=client_id, 
+                                                         client_secret=client_secret, 
+                                                         redirect_uri=redirect_uri,
+                                                         scope=self.scope,
+                                                         cache_path = cache_path
+                                                        )
         print("Spotify login succeeded.")
+        return None
+    
+    def _spotify_refresh_token(self):
+        if self.spotify_oauth._is_token_expired(self.token):
+            self.token = self.spotify_oauth.refresh_access_token(self.token['refresh_token'])
+            self.spotify = spotipy.Spotify(auth=self.token['access_token'])
+            
         return None
 
     def _create_spotify_target_playlist(self):
@@ -101,7 +119,7 @@ class JukeBox:
         _ = self.setup_new_round(first_round=True)
 
         first_round = datetime.now() + timedelta(minutes=0, seconds=1)
-        self.scheduler = BlockingScheduler(timezone="CET")
+        self.scheduler = BlockingScheduler(timezone="UTC")
 
         # first songs starts after first round of voting (1 minute)
         self.scheduler.add_job(self.play_next_song, 'date', run_date=first_round)
@@ -139,9 +157,10 @@ class JukeBox:
 
     def play_next_song(self):
         """
-        1. Call count votes
-        2. Setup New Round
-        3. Play next song
+        1. Check spotify token validity and refresh
+        2. Call count votes
+        3. Setup New Round
+        4. Play next song
 
         :param session_obj: db session object
         :param scheduler: apschedular object
@@ -149,6 +168,9 @@ class JukeBox:
 
         :return: None
         """
+        # refresh token if neccesary
+        self._spotify_refresh_token()
+        
         database_row_with_votes_per_song = self.count_votes_current_round()
         winning_song = self.determine_winning_song_current_round(database_row_with_votes_per_song)
         track_uri = [winning_song.uri]
