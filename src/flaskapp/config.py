@@ -49,9 +49,9 @@ class ProdConfig(DevelopmentConfig):
 
     # POSTGRES
     POSTGRES = {
-        'user': os.environ.get('POSTGRES_USER', 'postgres'),
-        'pw': os.environ.get('POSTGRES_PASSWORD', 'docker'),
-        'db': 'borrel_database',
+        'user': os.environ.get('POSTGRES_USER'),
+        'pw': os.environ.get('POSTGRES_PASSWORD'),
+        'db': 'postgres',
         'host': 'localhost',
         'port': '5432',
     }

@@ -119,7 +119,7 @@ class JukeBox:
         _ = self.setup_new_round(first_round=True)
 
         first_round = datetime.now() + timedelta(minutes=0, seconds=1)
-        self.scheduler = BlockingScheduler(timezone="UTC")
+        self.scheduler = BlockingScheduler(timezone="CET and")
 
         # first songs starts after first round of voting (1 minute)
         self.scheduler.add_job(self.play_next_song, 'date', run_date=first_round)
