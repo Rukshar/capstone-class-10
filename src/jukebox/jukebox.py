@@ -43,12 +43,6 @@ class JukeBox:
 
     def _spotify_login(self):
         cache_path = '.cache-{}'.format(self.config.SPOTIFY_USERNAME)
-
-        self.token = json.load(open(cache_path))
-        
-        # spotify object for querying playlists and adding new  songs
-        self.spotify = spotipy.Spotify(auth=self.token['access_token'])
-        
         # spotify oauth object for token refreshing
         self.spotify_oauth = oauth2.SpotifyOAuth(client_id=self.config.SPOTIFY_CLIENT_ID,
                                                  client_secret=self.config.SPOTIFY_CLIENT_SECRET,
@@ -56,6 +50,13 @@ class JukeBox:
                                                  scope=self.config.SCOPE,
                                                  cache_path=cache_path
                                                  )
+
+        self.token = json.load(open(cache_path))
+        
+        # spotify object for querying playlists and adding new  songs
+        self.spotify = spotipy.Spotify(auth=self.token['access_token'])
+        
+
         print("Spotify login succeeded.")
         return None
     
@@ -124,14 +125,13 @@ class JukeBox:
         self._spotify_login()
         self._create_spotify_target_playlist()
 
-        # get source playlist_content and populate database
-        playlist = self.spotify.user_playlist_tracks(self.config.SPOTIFY_USERNAME,
-                                                     self.config.SPOTIFY_SOURCE_PLAYLIST_URI,
-                                                     limit=100
-                                                    )
+        # populate the database
+        print("Populating the database")
+        populate(self.session,
+                 spotify_obj=self.spotify,
+                 username=self.config.SPOTIFY_USERNAME,
+                 source_playlist_id=self.config.SPOTIFY_SOURCE_PLAYLIST_URI)
 
-        playlist = playlist['items']
-        populate(self.session, playlist)
         print("Number of songs", self.session.query(Songs).count())
 
         # start playing music
