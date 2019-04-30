@@ -108,8 +108,7 @@ class JukeBox:
         wait_for_spotify_login = True
         while wait_for_spotify_login:
             if os.path.isfile(cache_path):
-                with open(cache_path, 'r') as f:
-                    token = json.load(f)
+                token = json.load(open(cache_path, 'r'))
 
                 if token['expires_at'] > int(datetime.now().timestamp()):
                     wait_for_spotify_login = False
@@ -163,12 +162,17 @@ class JukeBox:
             winner = max(database_row_with_votes_per_song, key=itemgetter(0))[2]
         else:
             winner = self.select_random_song_from_database()
+
         return winner
 
     def select_random_song_from_database(self):
         random_song_id = self.session.query(SelectedSongs).filter(
             SelectedSongs.round_id == self.vote_round.id).order_by(func.random()).first().song_id
+
         winner = self.session.query(Songs).filter(Songs.id == random_song_id).first()
+        if winner is None:
+            raise ValueError('Invalid winner')
+
         return winner
 
     def play_next_song(self):

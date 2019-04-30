@@ -22,6 +22,8 @@ class TestJukebox(unittest.TestCase):
         self.jukebox.session
         self.jukebox.session.add(Songs('testSong', 'testArtist', 'testFilename', 40.0))
         self.jukebox.session.add(Songs('testSong2', 'testArtist2', 'testFilename2', 87.0))
+        self.jukebox.session.add(Songs('testSong3', 'testArtist3', 'testFilename3', 10.0))
+        self.jukebox.session.add(Songs('testSong4', 'testArtist4', 'testFilename4', 42.0))
         self.jukebox.session.add(Round(datetime.datetime(2019, 5, 1, 0, 0, 0), datetime.datetime(2019, 5, 1, 0, 0, 10)))
         self.jukebox.session.add(Votes(1, 1))
         self.jukebox.session.add(Votes(2, 1))
