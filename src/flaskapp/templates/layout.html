@@ -10,6 +10,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <!--import font voor h1-->
     <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+    <link
+    href="http://cdn.pydata.org/bokeh/release/bokeh-1.1.0.min.css"
+    rel="stylesheet" type="text/css">
+    <link
+    href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-1.1.0.min.css"
+    rel="stylesheet" type="text/css">
+
+    <script src="http://cdn.pydata.org/bokeh/release/bokeh-1.1.0.min.js"></script>
+    <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-1.1.0.min.js"></script>
 
 </head>
 
@@ -32,6 +41,9 @@
             </li>
             <li class="nav-item{%- if request.path == url_for('admin.index') %} active{% endif %}">
                 <a class="nav-link" href="{{ url_for('admin.index') }}">Admin</a>
+            </li>
+            <li class="nav-item{%- if request.path == url_for('dashboard.index') %} active{% endif %}">
+                <a class="nav-link" href="{{ url_for('dashboard.index') }}">Dashboard</a>
             </li>
         </ul>
     </div>

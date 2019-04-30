@@ -6,6 +6,7 @@ from src.flaskapp.views.main.main import main
 from src.flaskapp.views.vote.vote import vote
 from src.flaskapp.views.error.error import error
 from src.flaskapp.views.admin.admin import admin
+from src.flaskapp.views.dashboard.dashboard import dashboard
 from src.flaskapp.extensions import db
 from src.flaskapp.extensions import basic_auth
 from src.flaskapp.config import *
@@ -47,3 +48,4 @@ def register_blueprints(app):
     app.register_blueprint(vote)
     app.register_blueprint(error)
     app.register_blueprint(admin)
+    app.register_blueprint(dashboard)
