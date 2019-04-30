@@ -12,6 +12,7 @@ from src.flaskapp.extensions import basic_auth
 from src.flaskapp.config import *
 from dotenv import load_dotenv
 
+
 def create_app():
     load_dotenv()
 
