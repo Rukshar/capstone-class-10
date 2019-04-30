@@ -1,7 +1,9 @@
 import os
-
+from dotenv import load_dotenv
 
 class BaseConfig(object):
+    load_dotenv()
+
     DEBUG = False
     TESTING = False
 
@@ -27,7 +29,6 @@ class BaseConfig(object):
 
     SCOPE = 'playlist-modify-public playlist-modify-private'
 
-
 class DevConfig(BaseConfig):
     ENV = 'dev'
     DEBUG = True
@@ -39,6 +40,7 @@ class TestConfig(BaseConfig):
     DEBUG = False
     TESTING = True
 
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///src/db/test.db'
 
 class ProdConfig(DevConfig):
     ENV = 'prod'

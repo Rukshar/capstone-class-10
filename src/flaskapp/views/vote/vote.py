@@ -19,8 +19,16 @@ def index():
     if vote_round is None:
         return render_template('error/not_active.html')
 
-    selected_songs = db.session.query(SelectedSongs, Songs).filter_by(round_id=vote_round.id).join(Songs).all()
-    return render_template('vote/vote.html', songs=selected_songs)
+    ip_address = request.environ['REMOTE_ADDR']
+
+    # Check if a user already voted in the current round
+    already_voted = db.session.query(db.exists().where(and_(IPAddress.ip_address == ip_address, 
+                                                            IPAddress.round_id == vote_round.id))).scalar()
+    if already_voted:
+        return redirect(url_for('vote.already_voted'))
+    else:
+        selected_songs = db.session.query(SelectedSongs, Songs).filter_by(round_id=vote_round.id).join(Songs).all()
+        return render_template('vote/vote.html', songs=selected_songs)
 
 
 @vote.route('/vote_song')
@@ -37,7 +45,7 @@ def vote_song():
 
     # Check if a user already voted in the current round
     already_voted = db.session.query(db.exists().where(and_(IPAddress.ip_address == ip_address,
-        IPAddress.round_id == vote_round.id))).scalar()
+                                                            IPAddress.round_id == vote_round.id))).scalar()
 
     if round_id == vote_round.id:
         if already_voted:
@@ -49,6 +57,7 @@ def vote_song():
             return redirect(url_for('vote.vote_redirect'))
     else:
         return redirect(url_for('vote.expired'))
+
 
 @vote.route('/vote_redirect')
 def vote_redirect():

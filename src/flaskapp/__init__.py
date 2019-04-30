@@ -12,6 +12,7 @@ from src.flaskapp.config import *
 from dotenv import load_dotenv
 
 def create_app():
+    load_dotenv()
 
     env = os.environ.get('ENV')
     if env is None:

@@ -31,6 +31,7 @@ class TestConfig(BaseConfig):
     DEBUG = False
     TESTING = True
 
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///../db/test.db'
 
 class DevConfig(BaseConfig):
     ENV = 'dev'

@@ -24,6 +24,7 @@ dependencies:
   - tzlocal=1.5.1
   - werkzeug=0.14.1
   - wheel=0.32.3
+  - python-dotenv=0.10.1
   - pip:
     - tinytag
     - spotipy

@@ -14,23 +14,9 @@ from apscheduler.schedulers.background import BlockingScheduler
 from src.jukebox.config import *
 from dotenv import load_dotenv
 
+
 class JukeBox:
-    def __init__(self):
-
-        load_dotenv()
-        env = os.environ.get('ENV')
-        if env is None:
-            raise ValueError('No environment specified')
-
-        if env == 'prod':
-            config = ProdConfig
-        elif env == 'test':
-            config = TestConfig
-        elif env == 'dev':
-            config = DevConfig
-        else:
-            raise ValueError('Configuration not loaded')
-
+    def __init__(self, config):
         self.config = config
 
         self.session = None
@@ -122,11 +108,12 @@ class JukeBox:
         wait_for_spotify_login = True
         while wait_for_spotify_login:
             if os.path.isfile(cache_path):
-                token = json.load(open(cache_path))
-                if token['expires_at'] > int(datetime.now().timestamp()):
-                    wait_for_spotify_login = False
-                else:
-                    os.remove(cache_path)
+                with open(cache_path, 'r') as f:
+                    token = json.load(f)
+                    if token['expires_at'] > int(datetime.now().timestamp()):
+                        wait_for_spotify_login = False
+                    else:
+                        os.remove(cache_path)
 
             else:
                 time.sleep(5)
