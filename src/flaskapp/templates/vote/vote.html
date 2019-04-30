@@ -6,6 +6,12 @@
         {% for song in songs %}
         <a href="{{ url_for('vote.vote_song', song_id=song.Songs.id, round_id=song.SelectedSongs.round_id) }}" class="btn btn-primary btn-lg btn-block" style="white-space: normal;">{{song.Songs.artist}} - {{ song.Songs.title }}</a>
         {% endfor %}
+
+    <script>
+    setTimeout(function(){
+        window.location.href = '/vote';
+    }, 10000);
+    </script>
 </div>
 
 {% endblock %}
