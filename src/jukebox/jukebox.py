@@ -125,13 +125,14 @@ class JukeBox:
         self._create_spotify_target_playlist()
 
         # get source playlist_content and populate database
-        playlist = self.spotify.user_playlist(self.config.SPOTIFY_USERNAME,
-                                              self.config.SPOTIFY_SOURCE_PLAYLIST_URI,
-                                              fields=['tracks'])
+        playlist = self.spotify.user_playlist_tracks(self.config.SPOTIFY_USERNAME,
+                                                     self.config.SPOTIFY_SOURCE_PLAYLIST_URI,
+                                                     limit=100
+                                                    )
 
-        playlist = playlist['tracks']['items']
-
+        playlist = playlist['items']
         populate(self.session, playlist)
+        print("Number of songs", self.session.query(Songs).count())
 
         # start playing music
         self.setup_new_round(first_round=True)
