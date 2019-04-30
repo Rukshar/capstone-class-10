@@ -110,10 +110,11 @@ class JukeBox:
             if os.path.isfile(cache_path):
                 with open(cache_path, 'r') as f:
                     token = json.load(f)
-                    if token['expires_at'] > int(datetime.now().timestamp()):
-                        wait_for_spotify_login = False
-                    else:
-                        os.remove(cache_path)
+
+                if token['expires_at'] > int(datetime.now().timestamp()):
+                    wait_for_spotify_login = False
+                else:
+                    os.remove(cache_path)
 
             else:
                 time.sleep(5)
