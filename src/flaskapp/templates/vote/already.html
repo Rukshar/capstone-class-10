@@ -3,6 +3,12 @@
 
 <div class="container">
     <h1>You have already voted. Please wait for the next round!</h1>
+
+    <script>
+    setTimeout(function(){
+        window.location.href = '/vote';
+    }, 10000);
+    </script>
 </div>
 
 {% endblock %}
