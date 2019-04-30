@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div id="plot" align="center">
+    <h1 align="center">Live Voting Dashboard</h1>
+
+    {{ script | safe }}
+    {{ div | safe }}
+
+    <script>
+    setTimeout(function(){
+        window.location.href = '/dashboard';
+    }, 20000);
+    </script>
+    <br><br>
+    <p align="center"><b>Currently the dashboard only renders well in desktop browsers</b></p>
+</div>
+{% endblock %}
