@@ -8,8 +8,8 @@ services:
 script:
  - python -m unittest
 
-deploy:
-  provider: script
-  script: bash docker_push
-  on:
-    branch: master
+#deploy:
+#  provider: script
+#  script: bash docker_push
+#  on:
+#    branch: master
