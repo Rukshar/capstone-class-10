@@ -6,4 +6,6 @@ if __name__ == '__main__':
 
     flaskapp_args = {"debug": False, "host": "0.0.0.0", "port": 5000}
     app = create_app()
+
     app.run(**flaskapp_args)
+    app.logging.info(f"Started Flask app on {flaskapp_args['host']}:{flaskapp_args['port']}")

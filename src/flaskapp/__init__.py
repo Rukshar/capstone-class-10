@@ -15,10 +15,12 @@ from dotenv import load_dotenv
 
 def create_app():
     load_dotenv()
+    app = Flask(__name__)
 
     env = os.environ.get('ENV')
     if env is None:
-        raise ValueError('No environment specified')
+        app.logging.error('No environment specified')
+        raise Exception('No environment specified')
 
     if env == 'prod':
         config = ProdConfig
@@ -27,9 +29,9 @@ def create_app():
     elif env == 'dev':
         config = DevConfig
     else:
-        raise ValueError('Configuration not loaded')
+        app.logging.error('No configuration loaded')
+        raise Exception('Configuration not loaded')
 
-    app = Flask(__name__)
     app.config.from_object(config)
 
     db.init_app(app)

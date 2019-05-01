@@ -12,8 +12,10 @@ from src.db.objects import Base, Songs, Votes, Round, SelectedSongs
 from src.db.populate import populate
 from apscheduler.schedulers.background import BlockingScheduler
 from src.jukebox.config import *
-from dotenv import load_dotenv
+import logging
 
+logger = logging.getLogger()
+logger.setLevel((logging.INFO))
 
 class JukeBox:
     def __init__(self, config):
@@ -56,7 +58,7 @@ class JukeBox:
                                                  scope=self.config.SCOPE,
                                                  cache_path=cache_path
                                                  )
-        print("Spotify login succeeded.")
+        logging.info("Spotify login succeeded.")
         return None
     
     def _spotify_refresh_token(self):
@@ -72,7 +74,7 @@ class JukeBox:
         target_playlist_title = '{}{}{}-XomniaBorrel'.format(today.year,
                                                              today.month,
                                                              today.day)
-        print("Finding target playlist...")
+        logging.info("Finding target playlist...")
         # check if playlist exists
         playlists = self.spotify.user_playlists(self.config.SPOTIFY_USERNAME)
         if not playlists['items']:
@@ -88,12 +90,12 @@ class JukeBox:
                     return None
 
     def make_new_playlist(self, playlist_title):
-        print("Making new playlist...")
+        logging.info("Making new playlist...")
         self.spotify.user_playlist_create(self.config.SPOTIFY_USERNAME, playlist_title)
 
         # retreive playlist uri of the new playlist for playback
         playlists = self.spotify.user_playlists(self.config.SPOTIFY_USERNAME)
-        print("Made playlist {}".format(playlists['items'][0]['name']))
+        logging.info("Made playlist {}".format(playlists['items'][0]['name']))
 
         target_playlist = [p for p in playlists['items'] if p['name'] == playlist_title]
         self.target_playlist_uri = target_playlist[0]['id']
@@ -103,7 +105,7 @@ class JukeBox:
         """
         :return: None
         """
-        print('Starting jukebox')
+        logging.info('Starting jukebox')
         cache_path = ".cache-{}".format(self.config.SPOTIFY_USERNAME)
         wait_for_spotify_login = True
         while wait_for_spotify_login:
@@ -132,7 +134,7 @@ class JukeBox:
 
         playlist = playlist['items']
         populate(self.session, playlist)
-        print("Number of songs", self.session.query(Songs).count())
+        logging.info(f"Number of songs {self.session.query(Songs).count()}")
 
         # start playing music
         self.setup_new_round(first_round=True)
@@ -194,7 +196,7 @@ class JukeBox:
 
         round_end = self.setup_new_round(song=winning_song, first_round=False)
         run_date = round_end - timedelta(minutes=0, seconds=1)
-        print('New song at', run_date)
+        logging.info(f"New song at {run_date}")
         self.scheduler.add_job(self.play_next_song, 'date', run_date=run_date, args=[])
         self.play_winning_song(track_uri)
 
@@ -214,7 +216,7 @@ class JukeBox:
         selected_song_ids = random.sample(songs, 4)
 
         if first_round:
-            print('Setting up initial round')
+            logging.info('Setting up initial round')
             now = datetime.now()
             round_end = now + timedelta(minutes=0, seconds=2)
             vote_round = Round(now, round_end)
