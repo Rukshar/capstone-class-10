@@ -11,8 +11,6 @@ def populate(session, spotify_obj, username, source_playlist_id):
                                                     offset=offset,
                                                     limit=limit
                                                     )
-        session.flush()
-        session.commit()
 
         for song in playlist['items']:
             title = song['track']['name'][0:100]
@@ -20,6 +18,9 @@ def populate(session, spotify_obj, username, source_playlist_id):
             song_uri = song['track']['uri']
             duration = song['track']['duration_ms'] / 1000
             session.add(Songs(title, artist, song_uri, duration))
+
+        session.flush()
+        session.commit()
 
         if playlist['next'] is None:
             playlist_switch = False
