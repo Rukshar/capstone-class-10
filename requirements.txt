@@ -22,4 +22,4 @@ urllib3==1.24.2
 Werkzeug==0.15.2
 wincertstore==0.2
 pandas==0.24.2
-bokeh==1.1.0
+plotly==3.4.2
