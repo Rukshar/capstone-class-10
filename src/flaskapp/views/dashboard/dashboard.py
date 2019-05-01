@@ -1,10 +1,12 @@
 import sys
 import pandas as pd
-from src.db.objects import Songs, Votes, Round, SelectedSongs
-from flask import Blueprint, request, render_template, redirect, url_for
+import json
+import textwrap
+from flask import Blueprint, render_template
 from sqlalchemy import func
-from bokeh.plotting import figure
-from bokeh.embed import components
+import plotly
+import plotly.graph_objs as go
+from src.db.objects import Songs, Votes, Round, SelectedSongs
 from src.flaskapp.extensions import db
 
 dashboard = Blueprint('dashboard', __name__, url_prefix='/dashboard')
@@ -39,6 +41,11 @@ def fetch_data():
         df_songs.loc[df_songs.song_id == t.song_id, 'title'] = "{} - {}".format(song.artist,
                                                                                 song.title
                                                                                 )
+    # textwrap long titles
+    df_songs['title'] = ['<br>'.join(textwrap.wrap(i, 20)) for i in df_songs.title]
+
+    # fix possibility of duplicate tracks in one random pick
+    df_songs = df_songs.groupby('title').n_votes.sum().reset_index()
 
     return df_songs
 
@@ -49,27 +56,43 @@ def create_figure():
     """
     data = fetch_data()
 
-    p = figure(x_range=data['title'],
-               y_range=(0, 100),
-               plot_width=1000,
-               plot_height=500,
-               title='',
-               toolbar_location=None
-               )
+    trace = [go.Bar(
+        x = data['title'],
+        y= data['n_votes'],
+        name='',
+        marker=dict(
+            color='rgb(34,50,132)'
+        )
+    )
+    ]
 
-    p.vbar(x=data['title'], top=data['n_votes'], width=0.9)
+    layout = go.Layout(
+        xaxis=dict(
+            title='',
+            tickfont=dict(
+                size=16,
+            )
+        ),
+        yaxis=dict(
+            title='% of Votes',
+            range=[0, 100],
+            showline=True,
+            tickfont=dict(
+                size=16,
+            )
+        ),
 
-    # Set the x axis label
-    p.xaxis.axis_label = ''
-    p.xgrid.grid_line_color = None
+    )
 
-    return p
+    fig = go.Figure(data=trace, layout=layout)
+    graph_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return graph_json
+
 
 
 @dashboard.route('/')
 def index():
     plot = create_figure()
 
-    script, div = components(plot)
-
-    return render_template("dashboard/dashboard.html", script=script, div=div)
+    return render_template("dashboard/dashboard.html", plot=plot)

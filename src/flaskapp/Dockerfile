@@ -23,5 +23,3 @@ EXPOSE 8080
 
 # Run with gunicorn
 ENTRYPOINT ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "4" , "--log-level", "debug", "src.flaskapp.wsgi:app"]
-
-
