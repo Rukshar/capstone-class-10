@@ -31,19 +31,21 @@
         <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
+    <div class="navbar-collapse collapse w-100" id="navbarSupportedContent">
+        <ul class="nav navbar-nav mr-auto">
             <li class="nav-item{%- if request.path == url_for('main.index') %} active{% endif %}">
                 <a class="nav-link" href="{{ url_for('main.index') }}">Home</a>
             </li>
             <li class="nav-item{%- if request.path == url_for('vote.index') %} active{% endif %}">
                 <a class="nav-link" href="{{ url_for('vote.index') }}">Vote</a>
             </li>
-            <li class="nav-item{%- if request.path == url_for('admin.index') %} active{% endif %}">
-                <a class="nav-link" href="{{ url_for('admin.index') }}">Admin</a>
-            </li>
             <li class="nav-item{%- if request.path == url_for('dashboard.index') %} active{% endif %}">
                 <a class="nav-link" href="{{ url_for('dashboard.index') }}">Dashboard</a>
+            </li>
+        </ul>
+        <ul class="nav navbar-nav">
+            <li class="nav-item{%- if request.path == url_for('admin.index') %} active{% endif %}">
+                <a class="nav-link" href="{{ url_for('admin.index') }}">Admin</a>
             </li>
         </ul>
     </div>

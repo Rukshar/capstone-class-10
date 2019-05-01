@@ -1,17 +1,19 @@
 import sys
-sys.path.append("../")
 import pandas as pd
 from src.db.objects import Songs, Votes, Round, SelectedSongs
-from src.flaskapp.extensions import db
-from flask import Blueprint,request, render_template, redirect, url_for
+from flask import Blueprint, request, render_template, redirect, url_for
 from sqlalchemy import func
 from bokeh.plotting import figure
 from bokeh.embed import components
+from src.flaskapp.extensions import db
 
 dashboard = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
 
-def fetch_data(db=db):
+def fetch_data():
+    """
+    @return DataFrame with information about the voting
+    """
     current_round = db.session.query(Round).order_by(Round.id.desc()).first().id
 
     df_songs = pd.read_sql(db.session.query(SelectedSongs).
@@ -42,24 +44,26 @@ def fetch_data(db=db):
 
 
 def create_figure():
+    """
+    @return Bokeh figure visualising the votes
+    """
     data = fetch_data()
 
     p = figure(x_range=data['title'],
-               y_range=(0,100),
+               y_range=(0, 100),
                plot_width=1000,
                plot_height=500,
                title='',
                toolbar_location=None
                )
 
-    p.vbar(x=data['title'], top=data['n_votes'], width = 0.9)
+    p.vbar(x=data['title'], top=data['n_votes'], width=0.9)
 
     # Set the x axis label
     p.xaxis.axis_label = ''
     p.xgrid.grid_line_color = None
 
     return p
-
 
 
 @dashboard.route('/')
