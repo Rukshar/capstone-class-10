@@ -1,14 +1,18 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<h1> Dash App </h1>
+<div id="plot" align="center">
+    <h1 align="center">Live Voting Dashboard</h1>
 
-<div class="dash">
-<iframe frameborder='0'
-        width="50%"
-        style='position: absolute; background: transparent; width: 100%; height:100%;'
-        src={{ dash_app_url }}
-        frameborder="0"></iframe>
+    {{ script | safe }}
+    {{ div | safe }}
+
+    <script>
+    setTimeout(function(){
+        window.location.href = '/dashboard';
+    }, 20000);
+    </script>
+    <br><br>
+    <p align="center"><b>Currently the dashboard only renders well in desktop browsers</b></p>
 </div>
-
 {% endblock %}
