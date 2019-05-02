@@ -209,7 +209,7 @@ class JukeBox:
         """
         :param first_round: Default: False. True if this is the first round to setup in jukebox session,
         :param song: song object to determine new round end
-        :return:
+        :return round end:
         """
         # Randomly provide selection of songs to choose from
         songs = self.session.query(Songs).all()
