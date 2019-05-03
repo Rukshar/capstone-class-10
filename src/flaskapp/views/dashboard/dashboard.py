@@ -87,7 +87,6 @@ def create_figure():
     return graph_json
 
 
-
 @dashboard.route('/')
 def index():
     plot = create_figure()

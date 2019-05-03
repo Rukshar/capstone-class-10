@@ -1,15 +1,28 @@
+branches:
+  only:
+  - master
+  - test-travis
+  -
 language: python
 python:
-  - "3.5"
+  - "3.6"
 
-services:
-  - docker
+env:
+- GAE_PYTHONPATH=${HOME}/ PATH=$PATH:${HOME}/google-cloud-sdk/bin CLOUDSDK_CORE_DISABLE_PROMPTS=1
+
+before_install:
+- pip install -r requirements.txt
+- export PYTHONPATH=./api/src:$PYTHONPATH
+
+install:
+- if [ ! -d ${HOME}/google-cloud-sdk ]; then curl https://sdk.cloud.google.com | bash; fi
+- aes-256-cbc -K $encrypted_cc09214865f3_key -iv $encrypted_cc09214865f3_iv -in credentials.tar.gz.enc -out credentials.tar.gz -d
+- tar -xf credentials.tar
+- gcloud auth activate-service-account --key-file client-secret.json
+- gcloud config set project capstone-class8
 
 script:
- - python -m unittest
+- python -m unittest
+- gcloud compute scp ./* travis_service@instance-1:~/ --zone us-east1-b --recurse
+- gcloud compute ssh travis_service@instance-1 --zone us-east1-b --command "sudo bash /home/travis_service/deploy.sh"
 
-#deploy:
-#  provider: script
-#  script: bash docker_push
-#  on:
-#    branch: master
