@@ -21,9 +21,15 @@ services:
       - 8080
     depends_on:
       - borrel_database
+    volumes:
+      - app-volume:/cache/
   borrel_jukebox:
     build:
       context: .
       dockerfile: Dockerfile
     depends_on:
       - borrel_database
+    volumes:
+      - app-volume:/cache/
+volumes:
+     app-volume:

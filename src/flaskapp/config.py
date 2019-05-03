@@ -43,3 +43,16 @@ class ProdConfig(DevConfig):
     ENV = 'prod'
     DEBUG = False
     TESTING = False
+
+    # POSTGRES
+    POSTGRES = {
+        'user': os.environ.get('POSTGRES_USER', 'postgres'),
+        'pw': os.environ.get('POSTGRES_PASSWORD', 'docker'),
+        'db': 'postgres',
+        'host': 'borrel_database',
+        'port': '5432',
+    }
+
+    # SQLAlchemy
+    SQLALCHEMY_DATABASE_URI = 'postgresql://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
+    SQLALCHEMY_TRACK_MODIFICATIONS = False

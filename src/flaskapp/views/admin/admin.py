@@ -19,7 +19,8 @@ def index():
 @basic_auth.required
 def spotify_oauth():
     scope = 'playlist-modify-public playlist-modify-private'
-    cache_path = ".cache-{}".format(os.environ.get('SPOTIFY_USERNAME'))
+    #TODO: make it so that we only need to change this in one place
+    cache_path = "/cache/cache-{}".format(os.environ.get('SPOTIFY_USERNAME'))
 
     # Auth Step 1: Authorization
     sp_oauth = oauth2.SpotifyOAuth(os.environ.get('SPOTIFY_CLIENT_ID'),
@@ -46,8 +47,9 @@ def spotify_oauth():
 @admin.route("/callback/q")
 @basic_auth.required
 def callback():
+    #TODO: make it so that we only need to change this in one place
     scope = 'playlist-modify-public playlist-modify-private'
-    cache_path = ".cache-{}".format(os.environ.get('SPOTIFY_USERNAME'))
+    cache_path = "/cache/cache-{}".format(os.environ.get('SPOTIFY_USERNAME'))
 
     # Auth Step 4: Requests refresh and access tokens
     sp_oauth = oauth2.SpotifyOAuth(os.environ.get('SPOTIFY_CLIENT_ID'),

@@ -42,7 +42,7 @@ class JukeBox:
         return None
 
     def _spotify_login(self):
-        cache_path = '.cache-{}'.format(self.config.SPOTIFY_USERNAME)
+        cache_path = '/cache/cache-{}'.format(self.config.SPOTIFY_USERNAME)
         # spotify oauth object for token refreshing
         self.spotify_oauth = oauth2.SpotifyOAuth(client_id=self.config.SPOTIFY_CLIENT_ID,
                                                  client_secret=self.config.SPOTIFY_CLIENT_SECRET,
@@ -61,7 +61,6 @@ class JukeBox:
         return None
     
     def _spotify_refresh_token(self):
-
         if self.spotify_oauth._is_token_expired(self.token):
             self.token = self.spotify_oauth.refresh_access_token(self.token['refresh_token'])
             self.spotify = spotipy.Spotify(auth=self.token['access_token'])
@@ -105,7 +104,7 @@ class JukeBox:
         :return: None
         """
         print('Starting jukebox')
-        cache_path = ".cache-{}".format(self.config.SPOTIFY_USERNAME)
+        cache_path = "/cache/cache-{}".format(self.config.SPOTIFY_USERNAME)
         wait_for_spotify_login = True
         while wait_for_spotify_login:
             if os.path.isfile(cache_path):
