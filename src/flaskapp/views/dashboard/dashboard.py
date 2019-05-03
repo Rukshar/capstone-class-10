@@ -1,4 +1,3 @@
-import sys
 import pandas as pd
 import json
 import textwrap
@@ -52,7 +51,7 @@ def fetch_data():
 
 def create_figure():
     """
-    @return Bokeh figure visualising the votes
+    @return Plotly figure visualising the votes
     """
     data = fetch_data()
 
