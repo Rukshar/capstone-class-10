@@ -63,14 +63,13 @@ def create_figure():
         marker=dict(
             color='rgb(34,50,132)'
         )
-    )
-    ]
+    )]
 
     layout = go.Layout(
         xaxis=dict(
             title='',
             tickfont=dict(
-                size=16,
+                size=16
             )
         ),
         yaxis=dict(
@@ -80,8 +79,7 @@ def create_figure():
             tickfont=dict(
                 size=16,
             )
-        ),
-
+        )
     )
 
     fig = go.Figure(data=trace, layout=layout)
