@@ -20,14 +20,12 @@ class BaseConfig(object):
     SQLALCHEMY_DATABASE_URI = 'postgresql://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # Spotify
     SPOTIFY_CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
     SPOTIFY_CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET')
-
-    # Spotify
     SPOTIFY_USERNAME = os.environ.get('SPOTIFY_USERNAME')
     SPOTIFY_SOURCE_PLAYLIST_URI = os.environ.get('SPOTIFY_SOURCE_PLAYLIST_URI')
-    SPOTIFY_REDIRECT_URI = os.environ.get('SPOTIFY_REDIRECT_URI')
-
+    SPOTIFY_REDIRECT_URI = 'http://localhost:5000/admin/callback/q'
     SCOPE = 'playlist-modify-public playlist-modify-private'
     CACHE_PATH = './cache/cache-{}'.format(os.environ.get('SPOTIFY_USERNAME'))
 
@@ -55,11 +53,15 @@ class ProdConfig(DevConfig):
         'pw': os.environ.get('POSTGRES_PASSWORD'),
         'db': 'postgres',
         'host': 'borrel_database',
-        'port': '5432',
+        'port': os.environ.get('POSTGRES_PORT'),
     }
 
     # SQLAlchemy
     SQLALCHEMY_DATABASE_URI = 'postgresql://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Spotify
     CACHE_PATH = '/cache/cache-{}'.format(os.environ.get('SPOTIFY_USERNAME'))
+
+    # Redirect URI
+    SPOTIFY_REDIRECT_URI = 'http://0.0.0.0:8080/admin/callback/q'
