@@ -23,11 +23,13 @@ class BaseConfig(object):
     SPOTIFY_CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
     SPOTIFY_CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET')
 
+    # Spotify
     SPOTIFY_USERNAME = os.environ.get('SPOTIFY_USERNAME')
     SPOTIFY_SOURCE_PLAYLIST_URI = os.environ.get('SPOTIFY_SOURCE_PLAYLIST_URI')
     SPOTIFY_REDIRECT_URI = os.environ.get('SPOTIFY_REDIRECT_URI')
 
     SCOPE = 'playlist-modify-public playlist-modify-private'
+    CACHE_PATH = './cache/cache-{}'.format(os.environ.get('SPOTIFY_USERNAME'))
 
 class DevConfig(BaseConfig):
     ENV = 'dev'
@@ -58,3 +60,6 @@ class ProdConfig(DevConfig):
 
     # SQLAlchemy
     SQLALCHEMY_DATABASE_URI = 'postgresql://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
+
+    # Spotify
+    CACHE_PATH = '/cache/cache-{}'.format(os.environ.get('SPOTIFY_USERNAME'))

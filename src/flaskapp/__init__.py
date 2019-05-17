@@ -1,6 +1,5 @@
 import sys
 sys.path.append("../")
-
 from flask import Flask
 from src.flaskapp.views.main.main import main
 from src.flaskapp.views.vote.vote import vote

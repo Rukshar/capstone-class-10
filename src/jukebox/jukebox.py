@@ -42,16 +42,16 @@ class JukeBox:
         return None
 
     def _spotify_login(self):
-        cache_path = '.cache-{}'.format(self.config.SPOTIFY_USERNAME)
+
         # spotify oauth object for token refreshing
         self.spotify_oauth = oauth2.SpotifyOAuth(client_id=self.config.SPOTIFY_CLIENT_ID,
                                                  client_secret=self.config.SPOTIFY_CLIENT_SECRET,
                                                  redirect_uri=self.config.SPOTIFY_REDIRECT_URI,
                                                  scope=self.config.SCOPE,
-                                                 cache_path=cache_path
+                                                 cache_path=self.config.CACHE_PATH
                                                  )
 
-        self.token = json.load(open(cache_path))
+        self.token = json.load(open(self.config.CACHE_PATH))
         
         # spotify object for querying playlists and adding new  songs
         self.spotify = spotipy.Spotify(auth=self.token['access_token'])
@@ -61,7 +61,6 @@ class JukeBox:
         return None
     
     def _spotify_refresh_token(self):
-
         if self.spotify_oauth._is_token_expired(self.token):
             self.token = self.spotify_oauth.refresh_access_token(self.token['refresh_token'])
             self.spotify = spotipy.Spotify(auth=self.token['access_token'])
@@ -105,16 +104,15 @@ class JukeBox:
         :return: None
         """
         print('Starting jukebox')
-        cache_path = ".cache-{}".format(self.config.SPOTIFY_USERNAME)
         wait_for_spotify_login = True
         while wait_for_spotify_login:
-            if os.path.isfile(cache_path):
-                token = json.load(open(cache_path, 'r'))
+            if os.path.isfile(self.config.CACHE_PATH):
+                token = json.load(open(self.config.CACHE_PATH, 'r'))
 
                 if token['expires_at'] > int(datetime.now().timestamp()):
                     wait_for_spotify_login = False
                 else:
-                    os.remove(cache_path)
+                    os.remove(self.config.CACHE_PATH)
 
             else:
                 time.sleep(5)

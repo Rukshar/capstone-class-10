@@ -1,4 +1,4 @@
-from . import create_app
+from src.flaskapp import create_app
 
 app = create_app()
 

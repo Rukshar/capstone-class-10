@@ -27,4 +27,5 @@ spotipy_config.py
 *.wav
 
 *.cache*
+cache*
 .env

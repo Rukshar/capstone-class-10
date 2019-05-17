@@ -51,12 +51,10 @@ For Mac OS X:
 To able to use Spotify's API, we have to get credentials for our account. Please follow the 
 steps provided [here](https://developer.spotify.com/documentation/general/guides/app-settings/). 
 
-Once you have registered, rename the `spotipy_config_example.py` to `spotipy_config.py` and add the `CLIENT_ID` and `CLIENT_SECRET` to this file. 
+Once you have registered, rename the `.env.exampley` to `.env` and add the `CLIENT_ID` and `CLIENT_SECRET` to this file. 
 
 Find a playlist with your song collection in the Spotify desktop app and right click on it to get the Spotify URI 
-and add it to the config as `SOURCE_PLAYLIST_URI`. 
-
-Then, create an empty playlist, get the URI and add it as `TARGET_PLAYLIST_URI` to the config. 
+and add it to `.env` as `SOURCE_PLAYLIST_URI`. 
 
 __Optionally, you  can also set them as environment variables like so:__
 
@@ -66,8 +64,15 @@ export SPOTIPY_CLIENT_SECRET='your-spotify-client-secret'
 export SPOTIPY_REDIRECT_URI='your-app-redirect-url'
 ```
 
-Last, but not least, whitelist the `http://localhost/` in the Spotify frontend as described 
+Last, but not least, whitelist `http://0.0.0.0:8080/callback/q` in the Spotify frontend as described 
 [here](https://developer.spotify.com/documentation/general/guides/app-settings/) 
+
+### Setting environment variables
+In the `.env` file, set the:
+- `ENV` for used config
+- `SECRET_KEY` for the flaskapp
+- `POSTGRES_USER` and `POSTGRES_PASSWORD`
+- `BASIC_AUTH_USERNAME` and `BASIC_AUTH_PASSWORD` for admin login
 
 # Launching the app
 
@@ -87,15 +92,7 @@ Then to launch you can simply run the following command from project root:
 docker-compose up
 ```
 
-For now, the jukebox has to be started seperately and locally due to an authentication prompt from Spotify API. To do so
-run from root:
-
-
-```
-python run_jukebox.py
-```
-
-And follow the authentication steps.
+After launching, the app is available at `http://0.0.0.0:8080` (the ip address of the server) and login to Spotify via the admin page (login required).
 
 ## Run seperately
 You can also choose to run the services seperately.

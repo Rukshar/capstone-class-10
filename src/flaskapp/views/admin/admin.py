@@ -3,10 +3,12 @@ from flask import Blueprint, render_template
 from datetime import datetime
 import json
 from flask import request, render_template, redirect, url_for
+from flask import current_app as app
 from spotipy import oauth2
 from src.flaskapp.extensions import basic_auth
 
 admin = Blueprint('admin', __name__, url_prefix='/admin')
+
 
 
 @admin.route('/')
@@ -19,14 +21,14 @@ def index():
 @basic_auth.required
 def spotify_oauth():
     scope = 'playlist-modify-public playlist-modify-private'
-    cache_path = ".cache-{}".format(os.environ.get('SPOTIFY_USERNAME'))
+    #TODO: make it so that we only need to change this in one place
 
     # Auth Step 1: Authorization
-    sp_oauth = oauth2.SpotifyOAuth(os.environ.get('SPOTIFY_CLIENT_ID'),
-                                   os.environ.get('SPOTIFY_CLIENT_SECRET'),
-                                   os.environ.get('SPOTIFY_REDIRECT_URI'),
+    sp_oauth = oauth2.SpotifyOAuth(client_id=os.environ.get('SPOTIFY_CLIENT_ID'),
+                                   client_secret=os.environ.get('SPOTIFY_CLIENT_SECRET'),
+                                   redirect_uri=app.config['SPOTIFY_REDIRECT_URI'],
                                    scope=scope,
-                                   cache_path=cache_path)
+                                   cache_path=app.config['CACHE_PATH'])
 
     token_info = sp_oauth.get_cached_token()
 
@@ -46,22 +48,22 @@ def spotify_oauth():
 @admin.route("/callback/q")
 @basic_auth.required
 def callback():
+    #TODO: make it so that we only need to change this in one place
     scope = 'playlist-modify-public playlist-modify-private'
-    cache_path = ".cache-{}".format(os.environ.get('SPOTIFY_USERNAME'))
 
     # Auth Step 4: Requests refresh and access tokens
-    sp_oauth = oauth2.SpotifyOAuth(os.environ.get('SPOTIFY_CLIENT_ID'),
-                                   os.environ.get('SPOTIFY_CLIENT_SECRET'),
-                                   os.environ.get('SPOTIFY_REDIRECT_URI'),
+    sp_oauth = oauth2.SpotifyOAuth(client_id=os.environ.get('SPOTIFY_CLIENT_ID'),
+                                   client_secret=os.environ.get('SPOTIFY_CLIENT_SECRET'),
+                                   redirect_uri=app.config['SPOTIFY_REDIRECT_URI'],
                                    scope=scope,
-                                   cache_path=cache_path)
+                                   cache_path=app.config['CACHE_PATH'])
 
     token_info = sp_oauth.get_cached_token()
     if not token_info:
         code = request.args['code']
         token = sp_oauth.get_access_token(code)
 
-        with open(cache_path, 'w') as file:
+        with open(app.config['CACHE_PATH'], 'w') as file:
             file.write(json.dumps(token))
 
     return redirect(url_for('admin.login_succesful'))

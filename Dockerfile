@@ -17,4 +17,5 @@ RUN pip install -r requirements.txt
 #EXPOSE 5432
 
 # Run the application when the container launches
-CMD ["python", "run_jukebox.py"]
+#CMD ["python", "run_jukebox.py"]
+ENTRYPOINT ["python", "run_jukebox.py"]
