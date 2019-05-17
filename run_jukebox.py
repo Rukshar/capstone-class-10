@@ -5,6 +5,6 @@ import time
 load_dotenv()
 
 if __name__ == '__main__':
-    time.sleep(20)
+    time.sleep(10)
     jukebox = create_jukebox()
     jukebox.start_jukebox()
